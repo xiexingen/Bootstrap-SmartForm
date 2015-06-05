@@ -1,5 +1,6 @@
 ﻿var global = {
-    Fn: {}  //公共方法
+    Fn: {},  //公共方法
+    param: { popPageSize: 10 } //公共参数
 };
 /***=========================
 + Serialize Form to Json
@@ -173,71 +174,71 @@ global.Fn.setDefaultValidator = function (form) {
     var errorHandler1 = $('.errorHandler', $form);
     var successHandler1 = $('.successHandler', $form);
 
-    //$.validator.setDefaults({
-    //    errorElement: "span", // contain the error msg in a span tag
-    //    errorClass: 'help-block',
-    //    errorPlacement: function (error, element) { // render error placement for each input type
-    //        var $beforElement = element;
-    //        if (element.attr("type") == "radio" || element.attr("type") == "checkbox") { // for chosen elements, need to insert the error after the chosen container
-    //            $beforElement = $(element).closest('.form-group').children('div').children().last();
-    //        }
-    //        else if (element.attr("name") == "dd" || element.attr("name") == "mm" || element.attr("name") == "yyyy") {
-    //            $beforElement = $(element).closest('.form-group').children('div');
-    //        }
-    //        else if (element.closest('.input-group')[0]) {
-    //            $beforElement = $(element).closest('.input-group');
-    //        }
-    //        error.insertAfter($beforElement);
-    //    },
-    //    ignore: ".ignore",
-    //    invalidHandler: function (event, validator) { //display error alert on form submit
-    //        successHandler1.hide();
-    //        errorHandler1.show();
-    //    },
-    //    highlight: function (element) {
-    //        //$(element).focus();
-    //        var $parent = $(element).closest('.form-group');
-    //        var $label = $parent.find('.symbol');
-    //        // display OK icon
-    //        if (($(element).attr("type") == "radio" || $(element).attr("type") == "checkbox") && $parent.children().length > 2) { // for chosen elements, need to insert the error after the chosen container
-    //            $parent = $parent.children('div');
-    //        }
-    //        else if ($(element).closest('.input-group')[0]) {
-    //            $parent = $(element).closest('.input-group').parent();
-    //            $label = $parent.prev("label").removeClass('has-success').addClass('has-error').find('.symbol');
-    //        }
-    //        else if ($parent.children().length > 2) {
-    //            $parent = $(element).parent();
-    //            $label = $parent.prev("label").removeClass('has-success').addClass('has-error').find('.symbol');
-    //        }
-    //        $parent.removeClass('has-success').addClass('has-error');
-    //        $label.removeClass('ok');
-    //    },
-    //    unhighlight: function (element) { // revert the change done by hightlight
-    //        $(element).closest(".has-error").removeClass('has-error').prev().removeClass('has-error');
-    //        // set error class to the control group
-    //    },
-    //    success: function (label, element) {
-    //        label.remove()//.addClass('help-block valid');
-    //        // mark the current input as valid and display OK icon
-    //        var $parent = $(element).closest('.form-group');
-    //        var $label = $parent.find('.symbol');
-    //        if ($(element).parent().hasClass('input-group')) {
-    //            $parent = $(element).closest('.input-group').parent();
-    //            $label = $parent.prev("label").removeClass('has-error').addClass('has-success').find('.symbol');
-    //        }
-    //        else if ($parent.children().length > 2) {
-    //            $parent = $(element).parent();
-    //            $label = $parent.prev("label").removeClass('has-error').addClass('has-success').find('.symbol');
-    //        }
-    //        $parent.removeClass('has-error').addClass('has-success');
-    //        $label.addClass('ok');
-    //    },
-    //    submitHandler: function (form) {
-    //        successHandler1.show();
-    //        errorHandler1.hide();
-    //    }
-    //});
+    $.validator.setDefaults({
+        errorElement: "span", // contain the error msg in a span tag
+        errorClass: 'help-block',
+        errorPlacement: function (error, element) { // render error placement for each input type
+            var $beforElement = element;
+            if (element.attr("type") == "radio" || element.attr("type") == "checkbox") { // for chosen elements, need to insert the error after the chosen container
+                $beforElement = $(element).closest('.form-group').children('div').children().last();
+            }
+            else if (element.attr("name") == "dd" || element.attr("name") == "mm" || element.attr("name") == "yyyy") {
+                $beforElement = $(element).closest('.form-group').children('div');
+            }
+            else if (element.closest('.input-group')[0]) {
+                $beforElement = $(element).closest('.input-group');
+            }
+            error.insertAfter($beforElement);
+        },
+        ignore: ".ignore",
+        invalidHandler: function (event, validator) { //display error alert on form submit
+            successHandler1.hide();
+            errorHandler1.show();
+        },
+        highlight: function (element) {
+            //$(element).focus();
+            var $parent = $(element).closest('.form-group');
+            var $label = $parent.find('.symbol');
+            // display OK icon
+            if (($(element).attr("type") == "radio" || $(element).attr("type") == "checkbox") && $parent.children().length > 2) { // for chosen elements, need to insert the error after the chosen container
+                $parent = $parent.children('div');
+            }
+            else if ($(element).closest('.input-group')[0]) {
+                $parent = $(element).closest('.input-group').parent();
+                $label = $parent.prev("label").removeClass('has-success').addClass('has-error').find('.symbol');
+            }
+            else if ($parent.children().length > 2) {
+                $parent = $(element).parent();
+                $label = $parent.prev("label").removeClass('has-success').addClass('has-error').find('.symbol');
+            }
+            $parent.removeClass('has-success').addClass('has-error');
+            $label.removeClass('ok');
+        },
+        unhighlight: function (element) { // revert the change done by hightlight
+            $(element).closest(".has-error").removeClass('has-error').prev().removeClass('has-error');
+            // set error class to the control group
+        },
+        success: function (label, element) {
+            label.remove()//.addClass('help-block valid');
+            // mark the current input as valid and display OK icon
+            var $parent = $(element).closest('.form-group');
+            var $label = $parent.find('.symbol');
+            if ($(element).parent().hasClass('input-group')) {
+                $parent = $(element).closest('.input-group').parent();
+                $label = $parent.prev("label").removeClass('has-error').addClass('has-success').find('.symbol');
+            }
+            else if ($parent.children().length > 2) {
+                $parent = $(element).parent();
+                $label = $parent.prev("label").removeClass('has-error').addClass('has-success').find('.symbol');
+            }
+            $parent.removeClass('has-error').addClass('has-success');
+            $label.addClass('ok');
+        },
+        submitHandler: function (form) {
+            successHandler1.show();
+            errorHandler1.hide();
+        }
+    });
 };
 
 
@@ -565,17 +566,16 @@ global.Fn.ShowPop = function (options) {
                         pageIndex: opts.content.pagination.pageIndex,
                         pageSize: opts.content.pagination.pageSize,
                         queryParameter: opts.content.pagination.queryParameter, //查询的表单
-                        successCallBack: opts.content.pagination.successCallBack// function (data) { return data;} //查询数据成功后的回调，用于对数据的处理
+                        successCallBack: opts.content.pagination.successCallBack,// function (data) { return data;} //查询数据成功后的回调，用于对数据的处理
+                        completeCallBack: function () { $popups.setPosition(1); } //在datagrid渲染完成后 重新定位位置
                     },
-                    operator: {
+                    outOperator: {
                         search: {
                             targetId: 'btnSearch', //查询按钮id
                             form: "popSearchForm", //查询按钮关联的表单id
                             beforeSearch: undefined,
                             resetId: 'btnReset'
                         },
-                        del: false,
-                        edit: false
                     }
                 }).Render();
                 //增加获取所选数据方法
@@ -663,20 +663,32 @@ global.Fn.removeLoading = function (obj) {
  * target:'',
  * method:'',
  * form:'',
+ * validateReadOnly:true, //是否验证readonly的元素
  * beforePost:function(){},
  * callback:function(){}
  * }
  */
 global.Fn.SaveForm = function (options) {
-    var defaultConfig = { method: 'post' };
+    var defaultConfig = { method: 'post', validateReadOnly: true };
     var config = $.extend(true, defaultConfig, options);
     global.Fn.$(config.target).attr('disabled', true);
     ValidateConfig(config);
     //验证表单
     if (global.Fn.$(config.form).valid()) {
-        var formData = global.Fn.serializeJson(config.form);
+        if (config.validateReadOnly) {
+            var $readonlyInputs = global.Fn.$(config.form).find('input[readonly]');
+            if ($readonlyInputs.length > 0 && !$readonlyInputs.valid()) {
+                global.Fn.$(config.target).removeAttr('disabled');
+                global.Fn.ShowMsg({
+                    type: 'alert:error',
+                    msg: '表单验证不通过，请修改！'
+                });
+                return false;
+            }
+        }
+        config.postData = global.Fn.serializeJson(config.form);
         if (config.beforePost) {
-            formData = config.beforePost(formData);
+            config.postData = config.beforePost(config.postData);
         }
         global.Fn.BaseAjax(config);
     }
@@ -695,6 +707,27 @@ global.Fn.SaveForm = function (options) {
     }
 }
 
+/*===================下载文件
+ * options:{
+ * url:'',  //下载地址
+ * data:{name:value}, //要发送的数据
+ * method:'post'
+ * }
+ */
+global.Fn.DownLoadFile = function (options) {
+    var config = $.extend(true, {method:'post'},options);
+    var $iframe = $('<iframe id="down-file-iframe" />');
+    var $form = $('<form target="down-file-iframe" method="' + config.method+ '" />');
+    $form.attr('action', config.url);
+    for (var key in config.data) {
+        $form.append('<input type="hidden" name="' + key + '" value="' + config.data[key] + '" />');
+    }
+    $iframe.append($form);
+    $(document.body).append($iframe);
+    $form[0].submit();
+    $iframe.remove();
+}
+
 /*=====================处理全局ajax请求(处理错误消息等)
  * options:{
  * url:'',
@@ -702,7 +735,7 @@ global.Fn.SaveForm = function (options) {
  * method:'post',
  * postData:{},//要发送的数据
  * callback:null,//针对成功后额外的处理
- * target:null,--触发此请求的元素id，用于在请求期间禁用此按钮 防止多次点击的情况
+ * target:null,--触发此请求的目标元素(id、jquery)，用于在请求期间禁用此按钮 防止多次点击的情况
  * }
  */
 global.Fn.BaseAjax = function (options) {
@@ -714,24 +747,32 @@ global.Fn.BaseAjax = function (options) {
         data: config.postData,
         dataType: config.dataType,
         success: function (data) {
-            if (data['code'] == 200) {
-                if (config.successShowMsg) {
+            if (config.dataType == 'json') {
+                if (data['code'] == 200) {
+                    if (config.successShowMsg) {
+                        global.Fn.ShowMsg({
+                            type: 'show:success',
+                            msg: data['message'] || data['code']
+                        });
+                    }
+                    if (config.callback) {
+                        config.callback(data['info']);
+                    }
+                }
+                else {
                     global.Fn.ShowMsg({
-                        type: 'show:success',
-                        msg: data['msg'] || data['code']
+                        type: 'alert:error',
+                        msg: data['message'] || data['code']
                     });
                 }
-                if (config.callback) {
-                    config.callback(data['info']);
-                }
+                if (config.target) { global.Fn.$(config.target).removeAttr('disabled') };
+            }
+            else if (config.dataType == 'html') {
+                window.document = data;
             }
             else {
-                global.Fn.ShowMsg({
-                    type: 'alert:error',
-                    msg: data['msg'] || data['code']
-                });
+                console.log("ajax未实现的响应类型:" + data);
             }
-            if (config.target) { global.Fn.$(config.target).removeAttr('disabled') };
         },
         error: function (data) {
             if (config.target) { global.Fn.$(config.target).removeAttr('disabled') };
@@ -789,7 +830,7 @@ global.Fn.InitFormData = function (model, elesConfig, hidesConfig) {
 
     function SetDefaultValue(eleConfig, model) {
         var ele = eleConfig['ele'];
-        if (eleConfig && ele && ele['id']) {
+        if (eleConfig && ele && ele['name']) {
             var key = ele['id'];
             if (key !== undefined && model[key] !== undefined) {
                 ele['value'] = model[key];
@@ -805,7 +846,7 @@ global.Fn.InitFormData = function (model, elesConfig, hidesConfig) {
 * container:限定在此id范围内查找
 */
 global.Fn.InitPlugin = function (plugins, container) {
-    //$("input.date-picker").datetimepicker({ autoclose: true }).next("span.input-group-addon").bind("click", function () { $(this).prev(".date-picker").datepicker("show"); });
+    //$("input.date-picker").datepicker({ format: 'yyyy-MM-dd', autoclose: true }).next("span.input-group-btn").bind("click", function () { $(this).prev(".date-picker").datepicker("show"); });
 }
 
 //返回下拉框数据源中指定value值的text值
@@ -832,3 +873,4 @@ global.Fn.DropDownFormatter = function (value, source) {
     })
     return returnData;
 }
+

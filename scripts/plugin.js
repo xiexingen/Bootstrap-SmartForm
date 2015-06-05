@@ -25,7 +25,7 @@
             queryParameter: {}, //查询的表单
             successCallBack: null// function (data) { return data;} //执行成功后的回调函数
         },
-        operator:{
+        outOperator:{ //外部操作，如 查询、删除等
             search: {
                 targetId: 'btnSearch', //查询按钮id
                 'form':"dataGridSearch", //查询按钮关联的表单id
@@ -36,14 +36,17 @@
                 url:'',
                 method:'get'
             },
+        },
+        operator:{  //对应于行内的操作栏,可以无限极添加自定义按钮
             edit:{
                 url:'',
-                method:'get'
+                method:'get',
+                ajax:false,
+                formatter:function(rowData){return '<a>xxx</a>'}
             },
-            view:{
-                url:'',
-                method:'get'
-            }
+            view:undefind,
+            del:undefind,
+            download:undefind
         }
     }
 */
@@ -67,7 +70,8 @@ function PagedDataTable(tableConfig) {
             queryParameter: {}, //查询的表单
             successCallBack: null// function (data) { return data;} //查询数据成功后的回调，用于对数据的处理
         },
-        operator: {
+        operator: undefined,
+        outOperator: {
             search: {
                 targetId: 'btnSearch', //查询按钮id
                 form: "dataGridSearch", //查询按钮关联的表单id
@@ -79,17 +83,61 @@ function PagedDataTable(tableConfig) {
                 method: 'post',
                 targetId: 'btnDelete'
             },
-            edit: {
-                url: '',
-                method: 'get',
-                targetId: 'btnReset'
-            }
         }
+    };
+    var buttons = {
+        //del: {
+        //    ajax: true,
+        //    primaryKey: undefined, //guid列名，如果没有 则使用配置的列名
+        //    html: '<button data-select="false" data-op="del" data-id="{id}" type="button" class="btn btn-xs btn-primary">删除</button>',
+        //    handle: function (id, grid, $target) {
+        //        var data = {};
+        //        data[grid.config.operator.del.primaryKey || grid.config.table.keyName] = id;
+        //        global.Fn.BaseAjax({
+        //            url: grid.config.operator.del.url,
+        //            method: 'get',
+        //            postData: data,
+        //            target: $target,
+        //            callback: function () {
+        //                grid.Search();
+        //            }
+        //        });
+        //    }
+        //},
+        download: {
+            ajax: true, html: '<button data-select="false" data-op="download" data-id="{id}" type="button" class="btn btn-xs btn-primary">下载</button>',
+            handle: function (id, grid, $target) {
+                var data = {};
+                data[grid.config.operator.del.primaryKey || grid.config.table.keyName] = id;
+                global.Fn.DownLoadFile({
+                    url: grid.config.operator.del.url,
+                    data: data
+                });
+            }
+        },
+        del: { html: '<a data-select="false" href="{href}" class="btn btn-xs btn-primary">删除</a>' },
+        copy: { html: '<a data-select="false" href="{href}" class="btn btn-xs btn-primary">复制</a>' },
+        edit: { html: '<a data-select="false" href="{href}" class="btn btn-xs btn-primary">编辑</a>' },
+        view: { html: '<a data-select="false" href="{href}" class="btn btn-xs btn-primary">查看</a>' },
     };
 
     this.config = $.extend(true, {}, defaultConfig, tableConfig);
-    //此处仅为兼容之前的版本，后面可能会废除掉
-    this.config.operator.search = this.config.operator.search || tableConfig.search;
+    InitConfig(this.config);
+
+    function InitConfig(config) {
+        if (!config.outOperator.del.url) {
+            delete [config.outOperator.del];
+        }
+
+        if (config.operator) {
+            for (var opType in config.operator) {
+                if (config.operator[opType] && buttons[opType]) {
+                    config.operator[opType] = $.extend(true, buttons[opType], config.operator[opType]);
+                }
+            }
+        }
+    }
+
     this.pagedData = {};
 };
 PagedDataTable.prototype = {
@@ -110,8 +158,8 @@ PagedDataTable.prototype = {
         cur.config.columns.forEach(function (item) {
             arrTable.push('<th data-field="' + item['column'] + '" class="' + (item['className'] || "text-left") + '">' + item['title'] + '</th>');
         });
-        if (cur.config.operator.edit || cur.config.operator.view) {
-            arrTable.push('<th class="text-right">操作</th>');
+        if (cur.config.operator) {
+            arrTable.push('<th class="text-center">操作</th>');
         }
         arrTable.push('</tr></thead>');
         return arrTable.join('');
@@ -119,9 +167,11 @@ PagedDataTable.prototype = {
     _GenerateTableBody: function (arrData) {
         var cur = this;
         var arrTable = [];
+        var primaryKey = cur.config.table.keyName;
         if (arrData && arrData.length > 0) {
             //foreach page data
             arrData.forEach(function (itemData, index) {
+                var guid = itemData[primaryKey];
                 arrTable.push('<tr>');
                 if (cur.config.pagination.rownumber) {
                     arrTable.push('<td class="text-center datagrid-rownumber">' + ((index + 1) + (cur.config.pagination.pageIndex - 1) * cur.config.pagination.pageSize) + '</td>');
@@ -140,15 +190,29 @@ PagedDataTable.prototype = {
                     arrTable.push((item['formatter'] && item['formatter'](itemData[item['column']], item['source'] || itemData)) || itemData[item['column']]);
                     arrTable.push('</td>');
                 });
-                if (cur.config.operator.edit || cur.config.operator.view) {
-                    arrTable.push('<td class="text-right">');
-                    if (cur.config.operator.edit) {
-                        arrTable.push('<a data-select="false" href="' + cur.config.operator.edit.url + '/' + itemData[cur.config['table']['keyName']] + '"  data-id="' + itemData[cur.config['table']['keyName']] + '" class="btn btn-xs btn-primary">编辑</a>');
-                    }
-                    if (cur.config.operator.view) {
-                        arrTable.push('<a data-select="false" href="' + cur.config.operator.view.url + '/' + itemData[cur.config['table']['keyName']] + '"  data-id="' + itemData[cur.config['table']['keyName']] + '" class="btn btn-xs btn-primary">查看</a>');
-                    }
+                if (cur.config.operator) {
+                    arrTable.push('<td class="text-center datagrid-op">');
 
+                    for (var key in cur.config.operator) {
+                        var opConfig = cur.config.operator[key];
+                        if (opConfig) {
+                            if (opConfig.formatter) {
+                                arrTable.push(opConfig.formatter(itemData));
+                            }
+                            else {
+                                var btnHTML = '';
+                                if (opConfig['ajax'] === true) {
+                                    btnHTML = opConfig['html'].replace(/\{id\}/, guid);
+                                }
+                                else {
+                                    var concatStr = opConfig['url'].indexOf("?") != -1 ? "&" : "?";
+                                    var url = opConfig['url'] + concatStr + primaryKey + "=" + guid;
+                                    btnHTML = opConfig['html'].replace(/\{href\}/, url);
+                                }
+                                arrTable.push(btnHTML);
+                            }
+                        }
+                    }
                     arrTable.push('</td>');
                 }
                 arrTable.push('</tr>');
@@ -160,15 +224,6 @@ PagedDataTable.prototype = {
         }
         return arrTable.join('');
     },
-    //GenerateTable: function (arrData) {
-    //    var cur = this;
-    //    var arrTable = [];
-    //    arrTable.push('<table class="paged-data-table ' + cur.config['table']['className'] + '">');
-    //    arrTable.push(cur._GenerateTableHead());
-    //    arrTable.push(cur._GenerateTableBody(arrData));
-    //    arrTable.push('</table>');
-    //    return arrTable.join('');
-    //},
     GenerateTableFRM: function () {
         var cur = this;
         var $table = $('<table class="paged-data-table ' + cur.config['table']['className'] + '">');
@@ -180,7 +235,7 @@ PagedDataTable.prototype = {
         var cur = this;
         var pagingHTML = [];
         var total_page = Math.ceil(totalNumber / cur.config.pagination.pageSize);
-        pagingHTML.push(' <div class="col-sm-10 pull-left text-left">');
+        pagingHTML.push(' <div class="col-sm-7 pull-left text-left">');
         pagingHTML.push(' <ul id="pagination" class="pagination pagination-margin">');
         var curPageIndex = cur.config.pagination.pageIndex
         if (total_page > 0) {
@@ -223,7 +278,7 @@ PagedDataTable.prototype = {
         pagingHTML.push(' </ul>');
         pagingHTML.push(' </div>');
         //汇总分页
-        pagingHTML.push('<div id="paginationTxt" class="col-sm-2 pull-right text-right">');
+        pagingHTML.push('<div id="paginationTxt" class="col-sm-5 pull-right text-right">');
         pagingHTML.push(curPageIndex + " / " + total_page + " 页  (共 " + totalNumber + " 条记录)");
         pagingHTML.push(' </div>');
         return pagingHTML.join('');
@@ -312,12 +367,12 @@ PagedDataTable.prototype = {
     */
     GetPagedData: function () {
         var cur = this;
-        return cur.pagedData.data.listdata||[];
+        return cur.pagedData.info.result_list || [];
     },
     Render: function () {
         var cur = this;
         var $container = global.Fn.$(cur.config.table.container);
-        var $table=cur.GenerateTableFRM();
+        var $table = cur.GenerateTableFRM();
 
         if (cur.config.pagination.autoLoad) {
             cur.Search();
@@ -325,10 +380,10 @@ PagedDataTable.prototype = {
         else {
             $table.append($(cur._GenerateTableBody([])));
         }
-        var $pageBarContainer =cur._GeneratePageBarFRM();
+        var $pageBarContainer = cur._GeneratePageBarFRM();
         global.Fn.$(cur.config.table.container).append($table).append($pageBarContainer);
 
-        var operatorConfig = cur.config.operator;
+        var operatorConfig = cur.config.outOperator;
         if (operatorConfig.search) {
             //查询
             global.Fn.$(operatorConfig.search.targetId).bind('click', function () {
@@ -346,9 +401,9 @@ PagedDataTable.prototype = {
                 $del.attr('disabled', true);
                 var checkedIds = cur.GetChecked(true);
                 var delData = {};
-                delData[cur.config.table.keyName] = $.type(checkedIds) === 'array' ? checkedIds.join(',') : checkedIds;
+                delData[cur.config.outOperator.del.primaryKey || cur.config.table.keyName] = $.type(checkedIds) === 'array' ? checkedIds.join(',') : checkedIds;
 
-                if (delData[cur.config.table.keyName]) {
+                if (delData[cur.config.outOperator.del.primaryKey || cur.config.table.keyName]) {
                     $.ajax({
                         url: operatorConfig.del.url,
                         type: operatorConfig.del.method,
@@ -372,16 +427,53 @@ PagedDataTable.prototype = {
             });
         }
 
+        //下载
+        if (operatorConfig.download) {
+            var $download = global.Fn.$(operatorConfig.download.targetId);
+            $download.bind('click', function () {
+                $download.attr('disabled', true);
+                var checkedIds = cur.GetChecked(true);
+                var downData = {};
+                downData[cur.config.outOperator.download.primaryKey || cur.config.table.keyName] = $.type(checkedIds) === 'array' ? checkedIds.join(',') : checkedIds;
+
+                if (downData[cur.config.outOperator.download.primaryKey || cur.config.table.keyName]) {
+                    global.Fn.DownLoadFile({
+                        url: cur.config.outOperator.download.url,
+                        data: downData
+                    });
+                }
+                else {
+                    $download.removeAttr('disabled');
+                    global.Fn.ShowMsg({
+                        type: 'alert:error',
+                        msg: '请先选择一条记录！'
+                    });
+                }
+            });
+        }
+
         //点击行选中
         if (cur.config.table.selectOnCheck) {
             $('#' + cur.config.table.container).on('click.datagrid', "tbody>tr", function (e) {
                 var $clickTarget = $('input[data-role^="datagrid-"]', $(this));
-                if ($(e.target).data('role') !== $clickTarget.data('role') && $(e.target).data('select') !== false) {
+                //执行ajax操作的指定function
+                var $target = $(e.target);
+                //忽略掉系统选择框和操作按钮
+                if ($target.data('role') !== $clickTarget.data('role') && $target.data('select') !== false) {
                     $clickTarget.trigger('click');
                     event.preventDefault()
                 }
             });
         }
+
+        //操作按钮如：copy、del
+        $('#' + cur.config.table.container).on('click.opbutton', '.btn[data-op]', function () {
+            var $target = $(this);
+            var opType = $target.data('op');
+            if (opType) {
+                cur.config.operator[opType]['handle']($target.data('id'), cur, $target);
+            }
+        })
 
         //分页事件
         $("#pager-bar-container").on('click', 'li', function (event) {
@@ -401,7 +493,7 @@ PagedDataTable.prototype = {
     },
     Search: function () {
         var cur = this;
-        var searchConfig = cur.config.operator.search;
+        var searchConfig = cur.config.outOperator.search;
         var postData = global.Fn.serializeJson(global.Fn.$(searchConfig.form));
         //处理post的数据
         if (searchConfig.beforeSearch) {
@@ -607,7 +699,7 @@ function BSForm(eleConfigs) {
 };
 BSForm.prototype = {
     //存放当前容器ID
-    containerID:'',
+    containerID: '',
     /*=================
      * 根据配置为指定jquery元素添加data-属性
      * $target:目标元素
@@ -946,7 +1038,7 @@ BSForm.prototype = {
 
         var elesConfig = cur.config.eles;
         var hides = cur.config.hides;
-        var $form = cur.config
+        var $form = global.Fn.$(cur.containerID);
         //分组form
         if ($.type(elesConfig) === 'object') {
             for (var key in elesConfig) {
@@ -1000,17 +1092,26 @@ BSForm.prototype = {
 
         function SetDefaultValue(eleConfig, model) {
             var ele = eleConfig['ele'];
-            if (eleConfig && ele && ele['id']) {
-                var key = ele['id'];
-                if (key !== undefined && model[key] !== undefined) {
+            if (eleConfig && ele && ele['name']) {
+                var key = ele['name'];
+                var eleValue = model[key];
+                if (key !== undefined && eleValue !== undefined) {
                     if (ele['type'] === 'text' || ele['type'] === 'select' || ele['type'] === 'datetime' || ele['type'] === 'search' || ele['type'] === 'textarea') {
-                        $("#" + key, global.Fn.$(cur.containerID)).val(model[key]);
+                        $("#" + key, global.Fn.$(cur.containerID)).val(eleValue);
                     }
                     else if (ele['type'] === 'radio') {
-                        console.log("暂没实现");
+                        $(":radio[name=" + key + "][value='" + eleValue + "']", $form).attr('checked', 'checked')
                     }
-                    else if (ele['type'] === 'checkbox') {
-                        console.log("暂没实现");
+                    else if (ele['type'] === 'checkbox' && eleValue.length > 0) {
+                        var $ckboxs = $(':checkbox[name="' + key + '"]', $form);
+                        $ckboxs.each(function (index, item) {
+                            if (eleValue.some(function (ev) { return ev == item.value })) {
+                                $(item).attr('checked', 'checked');
+                            }
+                            else {
+                                $(item).removeAttr('checked');
+                            }
+                        });
                     }
                 }
             }
@@ -1045,5 +1146,9 @@ BSForm.prototype = {
             callBack(cur);
         };
         return cur;
+    },
+    GetFormData: function () {
+        var cur = this;
+        return global.Fn.serializeJson(cur.containerID);
     }
 };
