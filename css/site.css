@@ -1,0 +1,144 @@
+﻿
+/*#region extend by gary*/
+.datagrid-rownumber{
+    text-align:center;
+    width:45px;
+}
+.small-label {
+    width: 0;
+    padding: 5px 0 0;
+    margin-bottom: 0;
+    vertical-align: middle;
+}
+
+.form-horizontal .control-label {
+    text-align: left;
+}
+.form-horizontal .control-label span.symbol {
+  position: absolute;
+  left: 5px;
+  top: auto;
+}
+.symbol.required:before {
+  content: "*";
+  display: inline;
+  color: #E6674A;
+}
+.disabled {
+    cursor:not-allowed;
+    color:#eeeeee;
+}
+.move:hover{
+    cursor:move;
+}
+/*弹窗相关*/
+.bg-overlay {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 1035;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  opacity: 0.3;
+  Filter: alpha(opacity=30);
+}
+/*弹出默认位置*/
+.arpopups {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    z-index: 1036;
+    width: 600px;
+}
+/*弹窗里面的查询按钮*/
+.quick-search {
+  margin: 0 !important;
+  padding: 10px 0;
+  border-bottom: 1px solid #ddd;
+  background: #f5f5f5;
+}
+.no-padding {
+  padding: 0 !important;
+}
+/*分页里面的单选按钮和复选按钮*/
+.datagrid-radio,datagrid-checkbox{
+    width:5px;
+}
+/*分页栏边距*/
+.pagination-margin {
+    margin:0 0 0 5px;
+}
+/*分页里面的按钮*/
+.paged-data-table .btn{
+    margin: .25em;
+}
+/*#endregion*/
+
+/*ShowMsg 样式*/
+.btn-light-grey {
+	background-color: #999;
+	border-color: #8c8c8c;
+	color: #ffffff;
+}
+.btn-light-grey:hover, .btn-light-grey:focus, .btn-light-grey:active, .btn-light-grey.active {
+	background-color: #8c8c8c;
+	border-color: #808080;
+	color: #ffffff;
+}
+.show-msg {
+    overflow:hidden;
+}
+.show-msg .fa {
+    margin-right: 5px;
+    vertical-align: middle;
+    font-size: 20px;
+}
+.show-msg .show-msg-head {
+    overflow:hidden;
+}
+.show-msg .modal-body{
+    padding:8px;
+}
+.show-msg .modal-header{
+    padding:5px;
+}
+.show-msg .modal-footer {
+    text-align: center;
+    padding: 5px;
+    margin-top:5px;
+}
+
+.show-msg .btn-error {
+    background-color: #C83A2A;
+    border-color: #b33426;
+    color: #ffffff;
+}
+
+.show-msg-success {
+    background: #DFF0D8;
+    border-color: #468847;
+    color: #468847;
+    width: 260px;
+}
+
+.show-msg-info {
+    background: #D9EDF7;
+    border-color: #3A87AD;
+    color: #3A87AD;
+    width: 260px;
+}
+
+.show-msg-error {
+    background: #F2DEDE;
+    border-color: #B94A48;
+    color: #B94A48;
+    width: 260px;
+}
+
+.show-msg-warning {
+    background: #FCF8E3;
+    border-color: #C09853;
+    color: #C09853;
+    width: 260px;
+}

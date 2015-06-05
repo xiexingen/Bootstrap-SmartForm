@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+    
+    <head>
+        <meta charset="UTF-8">
+        <title>自定义布局</title>
+        <link rel="stylesheet" href="../css/bootstrap.css">
+        <!--自定义站点样式-->
+        <link rel="stylesheet" href="../css/site.css">
+        <script src="../lib/jquery.js"></script>
+        <script src="../lib/bootstrap.js"></script>
+        <!--工具方法-->
+        <script src="../scripts/global.js"></script>
+        <!--插件-->
+        <script src="../scripts/plugin.js"></script>
+    </head>
+    
+    <body>
+        <div class="panel panel-default">
+                <div class="panel-heading"><label>自定义布局</label></div>
+            <div class="panel-body">
+                <form action="#" id="formContainer" class="form form-horizontal"></form>
+            </div>
+        </div>
+         <div class="panel panel-default">
+            <div class="panel-heading"><label>介绍</label></div>
+            <div class="panel-body">
+                <h3>固定布局,即根据配置的布局来布局</h3>
+                <p>如果你配置的autoLayout:1,2 将使用1,2栅格来显示</p>
+                <p>如果你配置的autoLayout:1,2,2,4 第一个元素将使用1,2来布局，第二个将使用2,4来布局 如果没有2,4系统将会自动寻找1,2</p>
+            </div>
+        </div>
+        <script>
+            $(function () {
+                var eles=[
+                    [
+                      {ele:{type:'text',name:'UserName',title:'用户名:',required:true}},
+                      {ele:{type:'radio',name:'sex',title:'性别:',items:[{text:'男',value:1},{text:'女',value:2}]}},
+                      {ele:{type:'checkbox', name:'plant',title:'使用平台:',items:[{text:'APP',value:'app'},{text:'web',value:'web'}]}},
+                      {ele:{type:'select',name:'province',title:'省份:',withNull:true,items:[{text:'广东',value:'GD'},{text:'湖南',value:'HN'}]}}  
+                    ],
+                    [
+                           {ele:{type:'text',name:'DisplayName',title:'显示名称:'}},
+                           {ele:{type:'datetime',name:'FromeDate',title:'有效期:'}},
+                           {ele:{type:'datetime',name:'ToDate',title:'~'}}
+                    ]
+                ];
+                //隐藏表单元素主要用于编辑时候后台可以区别开来
+                var hides = [{ id: 'GUID' }];
+    
+                var bsForm = new BSForm({ eles: eles, hides: hides, autoLayout: '1,2,1,2' }).Render('formContainer');
+            });
+        </script>
+    </body></html>

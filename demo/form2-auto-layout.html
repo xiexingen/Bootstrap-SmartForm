@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+    
+    <head>
+        <meta charset="UTF-8">
+        <title>自动布局</title>
+        <link rel="stylesheet" href="../css/bootstrap.css">
+        <script src="../lib/jquery.js"></script>
+        <script src="../lib/bootstrap.js"></script>
+        <!--工具方法-->
+        <script src="../scripts/global.js"></script>
+        <!--插件-->
+        <script src="../scripts/plugin.js"></script>
+    </head>
+    
+    <body>
+        <div class="panel panel-default">
+                <div class="panel-heading"><label>自动布局</label></div>
+            <div class="panel-body">
+                <form action="#" id="formContainer" class="form form-horizontal"></form>
+            </div>
+        </div>
+         <div class="panel panel-default">
+            <div class="panel-heading"><label>介绍</label></div>
+            <div class="panel-body">
+                <h3>所谓的自动布局为:根据单个配置组的个数来自动使用不同的栅格，如：数组里面项数位2,则使用2，4，2，4布局</h3>
+                <p>依赖于bootstrap个栅格样式,仅支持12整分的格式,如果你配置5项，是不支持的</p>
+            </div>
+        </div>
+        <script>
+            $(function () {
+                var eles=[
+                    [
+                        {ele:{type:'text',name:'UserName',title:'用户名:',required:true}},
+                        {ele:{type:'radio',name:'sex',title:'性别:',items:[{text:'男',value:1},{text:'女',value:2}]}},
+                    ],
+                    [
+                      {ele:{type:'checkbox', name:'plant',title:'使用平台:',items:[{text:'APP',value:'app'},{text:'web',value:'web'}]}},
+                      {ele:{type:'select',name:'province',title:'省份:',withNull:true,items:[{text:'广东',value:'GD'},{text:'湖南',value:'HN'}]}}
+                    ],
+                    [
+                       {ele:{type:'text',name:'DisplayName',title:'显示名称:'}},
+                       {ele:{type:'datetime',name:'FromeDate',title:'有效期:'}},
+                       {ele:{type:'datetime',name:'ToDate',title:'~'}}
+                    ]
+                ];
+                //隐藏表单元素主要用于编辑时候后台可以区别开来
+                var hides = [{ id: 'GUID' }];
+    
+                var bsForm = new BSForm({ eles: eles, hides: hides, autoLayout:true }).Render('formContainer');
+            });
+        </script>
+    </body></html>

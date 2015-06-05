@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+    
+    <head>
+        <meta charset="UTF-8">
+        <title>分组表单</title>
+        <link rel="stylesheet" href="../css/bootstrap.css">
+        <!--自定义站点样式-->
+        <link rel="stylesheet" href="../css/site.css">
+        <script src="../lib/jquery.js"></script>
+        <script src="../lib/bootstrap.js"></script>
+        <!--工具方法-->
+        <script src="../scripts/global.js"></script>
+        <!--插件-->
+        <script src="../scripts/plugin.js"></script>
+    </head>
+    
+    <body>
+        <div class="panel panel-default">
+                <div class="panel-heading"><label>分组表单</label></div>
+            <div class="panel-body">
+                <form action="#" id="formContainer" class="form form-horizontal"></form>
+            </div>
+        </div>
+         <div class="panel panel-default">
+            <div class="panel-heading"><label>介绍</label></div>
+            <div class="panel-body">
+                <h3>与其他配置项一样样的，唯一的不同在于分组配置项为'组:配置项'的形式</h3>
+            </div>
+        </div>
+        <script>
+            $(function () {
+                //注意,当配置为组表单时候配置项为json对象而非数组
+                var eles={
+                    '用户信息':[
+                        [
+                          {ele:{type:'text',name:'UserName',title:'用户名:',required:true}},
+                          {ele:{type:'radio',name:'sex',title:'性别:',items:[{text:'男',value:1},{text:'女',value:2}]}}      
+                        ],
+                        [
+                            {ele:{type:'checkbox', name:'plant',title:'使用平台:',items:[{text:'APP',value:'app'},{text:'web',value:'web'}]}},
+                            {ele:{type:'select',name:'province',title:'省份:',withNull:true,items:[{text:'广东',value:'GD'},{text:'湖南',value:'HN'}]}}   
+                        ]                        
+                    ],
+                    '其他信息':[
+                       {ele:{type:'text',name:'DisplayName',title:'显示名称:'}},
+                       [
+                        {ele:{type:'datetime',name:'FromeDate',title:'有效期:'}},
+                        {ele:{type:'datetime',name:'ToDate',title:'~'}}   
+                       ]
+                    ]
+                };
+                //隐藏表单元素主要用于编辑时候后台可以区别开来
+                var hides = [{ id: 'GUID' }];
+    
+                var bsForm = new BSForm({ eles: eles, hides: hides, autoLayout:true }).Render('formContainer');
+            });
+        </script>
+    </body></html>
