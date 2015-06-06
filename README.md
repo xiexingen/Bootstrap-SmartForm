@@ -4,14 +4,18 @@
 
 本系列将包括
 
-1、表单支持的类型简介
+1、<a href="http://www.cnblogs.com/xiexingen/p/4555416.html" target="_blank">BootStrap智能表单系列 一 Demo示例</a>
 
-2、分块表单配置的介绍
+2、BootStrap 智能表单系列 二 BootStrap支持的类型简介
 
-3、自动表单布局介绍
+3、BootStrap 智能表单系列 三 分块表单配置的介绍
 
-4、表单依赖插件处理
+4、BootStrap 智能表单系列 四  表单布局介绍
 
-5、验证的支持
+5、BootStrap 智能表单系列 五  表单依赖插件处理
 
-6、表单配置json解析
+6、BootStrap 智能表单系列 六 表单数据绑定(编辑页面的数据绑定)
+
+7、BootStrap 智能表单系列 七 验证的支持
+
+8、BootStrap 智能表单系列 八 表单配置json详解
