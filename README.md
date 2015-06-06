@@ -6,16 +6,16 @@
 
 1、<a href="http://www.cnblogs.com/xiexingen/p/4555416.html" target="_blank">BootStrap智能表单系列 一 Demo示例</a>
 
-2、BootStrap 智能表单系列 二 BootStrap支持的类型简介
+2、<a href="http://www.cnblogs.com/xiexingen/p/4555527.html" target="_blank">BootStrap 智能表单系列 二 BootStrap支持的类型简介</a>
 
-3、BootStrap 智能表单系列 三 分块表单配置的介绍
+3、<a href="http://www.cnblogs.com/xiexingen/p/4556012.html" target="_blank">BootStrap 智能表单系列 三 分块表单配置的介绍</a>
 
-4、BootStrap 智能表单系列 四  表单布局介绍
+4、<a href="http://www.cnblogs.com/xiexingen/p/4556014.html" target="_blank">BootStrap 智能表单系列 四  表单布局介绍</a>
 
-5、BootStrap 智能表单系列 五  表单依赖插件处理
+5、<a href="http://www.cnblogs.com/xiexingen/p/4556016.html" target="_blank">BootStrap 智能表单系列 五  表单依赖插件处理</a>
 
-6、BootStrap 智能表单系列 六 表单数据绑定(编辑页面的数据绑定)
+6、<a href="http://www.cnblogs.com/xiexingen/p/4556059.html" target="_blank">BootStrap 智能表单系列 六 表单数据绑定(编辑页面的数据绑定)</a>
 
-7、BootStrap 智能表单系列 七 验证的支持
+7、<a href="http://www.cnblogs.com/xiexingen/p/4556017.html" target="_blank">BootStrap 智能表单系列 七 验证的支持</a>
 
-8、BootStrap 智能表单系列 八 表单配置json详解
+8、<a href="http://www.cnblogs.com/xiexingen/p/4556020.html" target="_blank">BootStrap 智能表单系列 八 表单配置json详解</a>
