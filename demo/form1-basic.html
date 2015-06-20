@@ -10,7 +10,9 @@
         <!--工具方法-->
         <script src="../scripts/global.js"></script>
         <!--插件-->
-        <script src="../scripts/plugin.js"></script>
+        <script src="../scripts/jquery.smart-form.js"></script>
+        <script src="../lib/jquery-file-upload/vendor/jquery.ui.widget.js"></script>
+        <script src="../lib/jquery-file-upload/jquery.fileupload.js"></script>
     </head>
     
     <body>
@@ -23,7 +25,11 @@
         <div class="panel panel-default">
             <div class="panel-heading"><label>介绍</label></div>
             <div class="panel-body">
-                <h3>支持的表单元素包括:text、select、radio、checkbox、datetime、search、textarea、自定义</h3>
+                <h3>支持的表单元素包括:text、select、radio、checkbox、datetime、search、textarea、自定义、上传图片</h3>
+                <blockquote>
+                    note:此处的图片上传仅生成结构，没有绑定事件的处理，如需自动处理相关事件，需要引用jquery-file-upload插件，然后调用
+                    <code>global.Fn.InitPlugin('img','formContainer')</code>
+                </blockquote>
             </div>
         </div>
         <script>
@@ -41,11 +47,14 @@
                         {ele:{pre:{text:'<input type="radio" />'},type:'text',name:'pre',title:'叉前面:'}},
                         {ele:{next:{text:'<input type="radio" />'},type:'text',name:'next',title:'叉后面:'}},
                         {ele:{pre:{text:'<input type="checkbox" />'},next:{text:'$'},type:'text',name:'pre&next',title:'前后皆叉:'}},
+                        {ele:{type:'img',id:'a1',name:'files',title:'图片',extendAttr:{url:'',filed:'headimg',handle:'single'}}}
                 ];
                 //隐藏表单元素主要用于编辑时候后台可以区别开来
                 var hides = [{ id: 'GUID' }];
     
-                var bsForm = new BSForm({ eles: eles, hides: hides, autoLayout:true }).Render('formContainer');
+                var bsForm = new BSForm({ eles: eles, hides: hides, autoLayout:true }).Render('formContainer',function(sf){
+                    global.Fn.InitPlugin('img','formContainer')
+                });
             });
         </script>
     </body></html>

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+    
+    <head>
+        <meta charset="UTF-8">
+        <title>自定义表单元素</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="../css/bootstrap.css">
+        <!--自定义站点样式-->
+        <link rel="stylesheet" href="../css/site.css">
+        <script src="../lib/jquery.js"></script>
+        <script src="../lib/bootstrap.js"></script>
+        <!--工具方法-->
+        <script src="../scripts/global.js"></script>
+        <!--插件-->
+        <script src="../scripts/jquery.smart-form.js"></script>
+    </head>
+    
+    <body>
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <label>级联的支持</label>
+            </div>
+            <div class="panel-body">
+                <form action="#" id="formContainer" class="form form-horizontal"></form>
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <label>介绍</label>
+            </div>
+            <div class="panel-body">
+                <h3 class="lead">自定义级联</h3>
+                <blockquote>
+                    <p>配置表单的值时，需要将后台传递过来的数据格式修改成指定格式的数据源，可以自定义方法任意修改</p>
+                    <p>在表单生成完成后，需要调用<code>global.Fn.CascadeSelect({targets:[''],primaryKey:'',relativeKey:''})</code></p>
+                </blockquote>
+                <h4>参数说明：</h4>
+                <blockquote>
+                    targets:字符串数组，顺序必须为依赖的先后顺序的id，如：省、市、县
+                    primaryKey:主键id，默认为：data-id,
+                    relativeKey:父级id，默认为data-parentId
+                </blockquote>
+            </div>
+        </div>
+        <script>
+            $(function () {
+               var eles = [
+                  [
+                        { ele: { type: 'select', name: 'province', title: '省:', withNull: true, items: [{ text: '广东', value: 'GuangDong', extendAttr: { id: 1000 } }, { text: '湖南', value: 'HuNan', extendAttr: { id: 2000 } }] } },
+                        { ele: { type: 'select', name: 'city', title: '市:', withNull: true, items: [{ "text": "广州", "value": "GuangZhou", "extendAttr": { "id": "1000001", "parentId": "1000" } }, { "text": "花都", "value": "HuaDu", "extendAttr": { "id": "1000002", "parentId": "1000" } }, { "text": "邵阳", "value": "ShaoYang", "extendAttr": { "id": "2000001", "parentId": "2000" } }, { "text": "长沙", "value": "ChangSha", "extendAttr": { "id": "2000002", "parentId": "2000" } }] } },
+                        { ele: { type: 'select', name: 'region', title: '区:', withNull: true, items: [{ "text": "天河区", "value": "TH", "extendAttr": { "id": "1000001001", "parentId": "1000001" } }, { "text": "海珠区", "value": "HZ", "extendAttr": { "id": "1000001002", "parentId": "1000001" } }, { "text": "越秀区", "value": "YX", "extendAttr": { "id": "1000001003", "parentId": "1000001" } }, { "text": "白云区", "value": "BY", "extendAttr": { "id": "1000001004", "parentId": "1000001" } }, { "text": "花都区", "value": "HD", "extendAttr": { "id": "1000002001", "parentId": "1000002" } }, { "text": "aa县", "value": "aa", "extendAttr": { "id": "2000001001", "parentId": "2000001" } }, { "text": "望城区", "value": "wc", "extendAttr": { "id": "2000002001", "parentId": "2000002" } }, { "text": "雨花区", "value": "yh", "extendAttr": { "id": "2000002002", "parentId": "2000002" } }] } },
+                  ]
+            ];
+            var bsForm = new BSForm({ eles: eles,autoLayout: true }).Render('formContainer', function (sf) {
+                //编辑页面的绑定
+                sf.InitFormData({
+                    province: 'GuangDong',
+                    city: 'GuangZhou',
+                    region:'TH'
+                });
+                //必须先赋值再生成插件
+                global.Fn.CascadeSelect({ targets: ['province', 'city', 'region'], primaryKey: 'data-id', relativeKey: 'data-parentId' });
+            });
+            });
+        </script>
+    </body>
+
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+    
+    <head>
+        <meta charset="UTF-8">
+        <title>表单-图片上传的支持</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="../css/bootstrap.css">
+        <!--自定义站点样式-->
+        <link rel="stylesheet" href="../css/site.css">
+        <script src="../lib/jquery.js"></script>
+        <script src="../lib/bootstrap.js"></script>
+        <!--工具方法-->
+        <script src="../scripts/global.js"></script>
+        <!--插件-->
+        <script src="../scripts/jquery.smart-form.js"></script>
+        <!--图片上传插件-->
+        <script src="../lib/jquery-file-upload/vendor/jquery.ui.widget.js"></script>
+        <script src="../lib/jquery-file-upload/jquery.iframe-transport.js"></script>
+        <script src="../lib/jquery-file-upload/jquery.fileupload.js"></script>
+    </head>
+    
+    <body>
+        <div class="panel panel-default">
+                <div class="panel-heading"><label>表单-图片上传的支持</label></div>
+            <div class="panel-body">
+                <form action="#" id="formContainer" class="form form-horizontal"></form>
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading"><label>介绍</label></div>
+            <div class="panel-body">
+                <h3 class="lead">自定义上传图片</h3>
+                <ul class="list-group">
+                    <li class="list-group-item">依赖jquery-file-upload插件,需要引用jquery.ui.widget.js、jquery.iframe-transport.js、jquery.fileload.js</li>
+                    <li class="list-group-item">调用<code>global.Fn.InitPlugin('img','formContainer');</code>formContainer:为表单id，缩小查找范围，可选</li>
+                    <li class="list-group-item">
+                        <h4>本插件的原理是将图片上传到服务器，然后服务器返回图片存储的路径，最后提交表单的时候将图片的路径发送给服务器存储，
+                            参数说明：</h4>
+                        <blockquote>
+                            <p>id:'可以任意给，主要用来区分'<p>
+                            <p>name:上传文件时，提交的键</p>
+                            <div class="list-group">
+                                <a href="#" class="list-group-item active">
+                                    <h4 class="list-group-item-heading">ExtendAttr:</h4>
+                                </a>
+                                <a href="#" class="list-group-item">
+                                    field:保存表单时，发送的键名
+                                </a>
+                                <a href="#" class="list-group-item">
+                                    handle:可选[single|mutiple|null] 如果为single，表示上传的图片会替换现有的图片，否则将追加在当前图片后面
+                                </a>
+                                <a href="#" class="list-group-item">
+                                    <p>url:图片上传提交的url,你也可以修改global.js文件中的global.Fn.InitUploadImage里面的默认值</p>
+                                    <p>note:该方法默认接受返回的json格式为：{result:200,imgurl:'.....'},result:200 表示图片上传成功！</p>
+                                </a>
+                            </div>
+                        </blockquote>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <script>
+            $(function () {
+                var eles=[
+                    [
+                      {ele:{type:'img',id:'img1',name:'files',title:'图片',extendAttr:{filed:'deatil_img',handle:'single',url:''}}}  
+                    ]
+                ];
+                var bsForm = new BSForm({ eles: eles, autoLayout:true}).Render('formContainer',function(bf){
+                    global.Fn.InitPlugin('img','formContainer');
+                });
+            });
+        </script>
+    </body></html>

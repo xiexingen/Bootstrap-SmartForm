@@ -1,5 +1,9 @@
 ﻿var global = {
     Fn: {},  //公共方法
+    urls: {
+        api: '../admin_api/',
+        view: ''
+    },
     param: { popPageSize: 10 } //公共参数
 };
 /***=========================
@@ -652,11 +656,21 @@ global.Fn.ShowPop = function (options) {
 =============================*/
 global.Fn.removeLoading = function (obj) {
     var $obj = obj || $(".LoadFileLayer");
-    $obj.fadeOut(200, function () {
+    $obj.fadeOut(50, function () {
         $obj.remove();
     });
     //global.LoadFileState = false;
 }
+
+global.Fn.showLoading = function (container) {
+    var $container = global.Fn.$(container||document.body);
+    $(document.body).append('<div class="LoadFileLayer"><div><img src="/images/images/ajax-loader-small.gif" />正在拼了命的为你加载...</div></div>');
+    $(".LoadFileLayer").css({
+        left: $container.offset().left,
+        top: $container.offset().top
+    });
+}
+
 
 /*=====================提交表单
  * options:{
@@ -715,9 +729,9 @@ global.Fn.SaveForm = function (options) {
  * }
  */
 global.Fn.DownLoadFile = function (options) {
-    var config = $.extend(true, {method:'post'},options);
+    var config = $.extend(true, { method: 'post' }, options);
     var $iframe = $('<iframe id="down-file-iframe" />');
-    var $form = $('<form target="down-file-iframe" method="' + config.method+ '" />');
+    var $form = $('<form target="down-file-iframe" method="' + config.method + '" />');
     $form.attr('action', config.url);
     for (var key in config.data) {
         $form.append('<input type="hidden" name="' + key + '" value="' + config.data[key] + '" />');
@@ -840,13 +854,115 @@ global.Fn.InitFormData = function (model, elesConfig, hidesConfig) {
 
 }
 
-/*========================
-*初始化插件
-* plugins:插件名称单个或者数组['datetime','search']|'datetime'
-* container:限定在此id范围内查找
-*/
+/*=====================提交表单
+  * options:{
+  * target:'',
+ * container:限定在此id范围内查找
+ */
 global.Fn.InitPlugin = function (plugins, container) {
-    //$("input.date-picker").datepicker({ format: 'yyyy-MM-dd', autoclose: true }).next("span.input-group-btn").bind("click", function () { $(this).prev(".date-picker").datepicker("show"); });
+    if ($.type(plugins) === 'string') { plugins = plugins.split(','); }
+    container = global.Fn.$(container || document);
+    if (plugins.indexOf('file') !== -1) {
+        global.Fn.InitUploadImage();
+    }
+    if (plugins.indexOf('img') !== -1) {
+        var $imgs = $('.upload-file', global.Fn.$(container || document));
+        $.each($imgs, function (index,img) {
+            global.Fn.InitUploadImage($(img).parent());
+        });
+    }
+    if (plugins.indexOf('datetime') !== -1) {
+        $("input.date-picker").datetimepicker({ pickTime: false, format: 'YYYY-MM-DD' }).next("span.input-group-btn").bind("click", function () { $(this).prev(".date-picker").focus(); });
+    }
+    if (plugins.indexOf('ckeditor') !== -1) {
+        var ckeditors = $('textarea[data-handle="ckeditor"]', container);
+        $.each(ckeditors, function (index, ck) {
+            CKEDITOR.replace(ck.name, { filebrowserUploadUrl: global.Fn.$(ck.id).data('url') || (http_server + 'admin/common/ckeditorimgupload.php') });
+        });
+    }
+}
+
+/*====================文件上传插件初始化
+ * container:optional 查找的容器
+ *
+ * data-handle:single,data-url:'',data-field:''
+ */
+global.Fn.InitUploadImage = function (container) {
+    container = container || document;
+    var $upload = $('.upload-file', global.Fn.$(container));
+
+    $upload.on('click', '.upFileBtn,.upload-item-remove', function () {
+        var $target = $(this);
+        //上传
+        if ($target.hasClass('upFileBtn')) {
+            var $file = $(':file', $upload);
+            $file[0].click();
+        }
+        else if ($target.hasClass('upload-item-remove')) {
+            $target.closest('li').remove();
+        }
+    });
+
+    var $fileUpload = $(':file', $upload);
+    $fileUpload.fileupload({
+        url: $upload.data('url') || "common/image_upload.php", //文件上传地址，当然也可以直接写在input的data-url属性内
+        //formData: { imgtype: "product", param2: "p2" }, //如果需要额外添加参数可以在这里添加
+        async: false,
+        add: function (e, data) {
+            //如果单个文件，清空已有的图片列表
+            if ($(':file', $upload).data('handle') == 'single') {
+                $(".upload-list>ul", $upload).empty();
+            }
+            data.submit();
+        },
+        done: function (e, data) {
+            data = JSON.parse(data.result);
+            if (data.result == "200") {
+                //var $targetScope= $(this).closest(".upload-file");
+                $(".upload-list>ul", $upload).append('<li><img src="' + data.imgurl + '"><span class="upload-item-remove glyphicon glyphicon-remove"></span><input name="' + $(':file', $upload).data('field') + '" type="hidden" value="' + data.imgurl + '" /></li>');
+            } else {
+                global.Fn.ShowMsg({
+                    type: 'alert:error',
+                    msg: data.msg || data.message
+                });
+            }
+        },
+    });
+}
+
+/*===============级联下拉
+*   opt:{
+*       targets:['province','city','region'], //关联的目标id
+*       primaryKey:'data-id',   //主键id
+*       relativeKey:'data-parentId' //父级主键ID
+*   }
+*/
+global.Fn.CascadeSelect = function (opt) {
+    opt = $.extend(true, { relativeKey: 'data-parentId', primaryKey: 'data-id' }, opt);
+    for (var i = 0; i < opt.targets.length - 1; i++) {
+        $("#" + opt.targets[i]).bind("change.cascade", function () {
+            var $this = $(this);
+            var nextIndex = opt.targets.indexOf($this.attr('id')) + 1;
+            var $next = $("#" + opt.targets[nextIndex]);
+            var curKeyValue = $this.find('option:checked').attr(opt.primaryKey);
+            var nextVal = $next.val();
+            var $nextItems = $next.find('option');
+
+            $next.find('option[' + opt.relativeKey + '="' + curKeyValue + '"]').removeClass('hide');
+            $next.find('option[' + opt.relativeKey + '!="' + curKeyValue + '"]').addClass('hide');
+            $next.find('option:not([value])').removeClass('hide');
+
+            //如果下一项的option处于显示状态，则自动选中，否则显示请选择
+            if ($next.find('option[value="' + nextVal + '"]').hasClass('hide')) {
+                $next.find("option").filter("option:hidden").first().attr('selected', true)
+            }
+            else {
+                $next.val(nextVal);
+            }
+            $next.change();
+        });
+    }
+    $("#" + opt.targets[0]).change();
 }
 
 //返回下拉框数据源中指定value值的text值

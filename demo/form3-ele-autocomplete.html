@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+    
+    <head>
+        <meta charset="UTF-8">
+        <title>自定义表单元素</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="../css/bootstrap.css">
+        <link rel="stylesheet" href="../css/jquery-ui.css">
+        <!--自定义站点样式-->
+        <link rel="stylesheet" href="../css/site.css">
+        <script src="../lib/jquery.js"></script>
+        <script src="../lib/jquery-ui.js"></script>
+        <script src="../lib/bootstrap.js"></script>
+        <!--工具方法-->
+        <script src="../scripts/global.js"></script>
+        <!--插件-->
+        <script src="../scripts/jquery.smart-form.js"></script>
+        <!--autocomplete插件-->
+        <script src="../scripts/jquery.fn.extend.js"></script>
+    </head>
+    
+    <body>
+        <div class="panel panel-default">
+                <div class="panel-heading"><label>自动完成</label></div>
+            <div class="panel-body">
+                <form action="#" id="formContainer" class="form form-horizontal"></form>
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading"><label>介绍</label></div>
+            <div class="panel-body">
+                <h3 class="lead">自动完成</h3>
+                    <blockquote>
+                        <p>note:需要引入js文件：jquery-ui.js、jquery.fn.extend.js</p>
+                      在表单生成完成后，通过指定元素调用SmartSearch方法
+                    </blockquote>
+                    <h4>参数说明：</h4>
+                    <blockquote>
+                        <p>url:请求的url</p>
+                        <p>beforeSearch:可选，在发送请求之前调用的方法，改方法有一个参数data包含要发送的数据，如果需要添加或者修改要发送的参数，修改次参数即可</p>
+                        <p>formatItem:可选，如果返回的不是简单的数组字符串，则必自定义操作，用于格式化界面显示的内容，例中显示的是产品编号 + 产品名称</p>
+                        <p>callback:可选，如果返回的不是简单的数组字符串，则必自定义操作，用于赋值</p>
+                        <small>note:如果接口返回的是简单的字符串数组，则 formatItem和callback皆可省略</small>
+                    </blockquote>
+            </div>
+        </div>
+        <script>
+            $(function () {
+                var eles=[
+                    [
+                        {ele:{id:'ProductCode',title:'产品编号：'}},
+                        {ele:{id:'ProductName',readonly:true,title:'产品名称：'}},
+                    ]
+                ];
+                //隐藏表单元素主要用于编辑时候后台可以区别开来
+                var hides = [{ id: 'id' }];
+    
+                var bsForm = new BSForm({ eles: eles, hides: hides, autoLayout:true }).Render('formContainer',function(sf){
+                     $("#ProductCode").SmartSearch({
+                        url: '../data/smart-search.json',
+                        beforeSearch: function (data) {
+                            data['tokenid'] = localStorage['tokenid'];
+                        },
+                        formatItem: function (item) {
+                            return item['ProductCode'] + '   ' + item['ProductName']
+                        },
+                        callback: function (item) {
+                            $("#ProductCode").val(item.ProductCode);
+                            $("#ProductName").val(item.ProductName);
+                        }
+                    });
+                });
+            });
+        </script>
+    </body></html>
