@@ -19,3 +19,9 @@
 7、<a href="http://www.cnblogs.com/xiexingen/p/4556017.html" target="_blank">BootStrap 智能表单系列 七 验证的支持</a>
 
 8、<a href="http://www.cnblogs.com/xiexingen/p/4556020.html" target="_blank">BootStrap 智能表单系列 八 表单配置json详解</a>
+
+9、<a href="http://www.cnblogs.com/xiexingen/p/4590384.html" target="_blank">BootStrap 智能表单系列 九 表单图片上传的支持</a>
+
+10、<a href="http://www.cnblogs.com/xiexingen/p/4590397.html" target="_blank">BootStrap 智能表单系列 十 自动完成组件的支持</a>
+
+11、<a href="http://www.cnblogs.com/xiexingen/p/4590404.html" target="_blank">BootStrap 智能表单系列 十一 级联下拉的支持</a>
