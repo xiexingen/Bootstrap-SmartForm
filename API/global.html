@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Global.Fn辅助方法API</title>
+        <link rel="stylesheet" href="http://ajax.aspnetcdn.com/ajax/bootstrap/3.0.0/css/bootstrap.min.css">
+        <script src="http://ajax.aspnetcdn.com/ajax/jquery/jquery-1.10.2.min.js"></script>
+        <script src="http://ajax.aspnetcdn.com/ajax/bootstrap/3.0.0/bootstrap.min.js"></script>
+        <style>
+            #myScrollspy{height:100%;top:100px;}
+            code{white-space: normal;}
+        </style>
+        <script type="text/javascript">
+            $(document).ready(function(){
+                $("#myScrollspy").affix({
+                    offset: { 
+                        top: 10 
+                 	}
+                });
+            });
+        </script>
+    </head>
+    
+    <body data-spy="scroll" data-target="#myScrollspy">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3 col-sm-4 col-xs-6" id="myScrollspy">
+                    <ul class="nav nav-pills" id="myNav">
+                         <li>
+                            <a href="#ShowPop">弹窗面板--global.Fn.ShowPop</a>
+                        </li>
+                        <li class="active">
+                            <a href="#ShowMsg">消息弹窗--global.Fn.ShowMsg</a>
+                        </li>
+                        <li>
+                            <a href="#DownLoadFile">下载--global.Fn.DownLoadFile</a>
+                        </li>
+                        <li>
+                            <a href="#CascadeSelectDemo">级联--global.Fn.CascadeSelect</a>
+                        </li>
+                        <li><a href="#InitPlugin">初始化插件--global.Fn.InitPlugin</a></li>
+                        <li><a href="#validation">验证样式--global.Fn.setDefaultValidator</a></li>
+                        <li><a href="#FormatDate">日期格式化--global.Fn.formatDate</a></li>
+                        <li><a href="#jqTool">jquery辅助方法--global.Fn.$</a></li>
+                        <li><a href="#other">other...............</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-9 col-sm-8 col-xs-6 pull-right">
+                    <div class="row" id="ShowPop">
+                        <h2>global.Fn.ShowPop(opt)</h2>
+                        <blockquote>
+                            <code>opt:{title:'',overlay:.5,callback:null,drag:true,size:undefind,content:'',buttons:{'保存': ["btn-primary btnSave"],'取消': ["btn-default btnCancel", function (pop) { pop.close(); }]}}</code>
+                            <h4>参数说明：</h4>
+                            <p><span class="badge">必填</span><code>title:''</code>显示的标题</p>
+                            <p><code>overlay:0.5</code>弹窗透明度，默认为0.5</p>
+                            <p><code>drag:true</code>是否允许拖动，默认为true</p>
+                            <p><code>size:undefind</code>弹窗的尺寸，demo:{width:600,height:400} 表示弹窗设置为高400px，宽600px</p>
+                            <p><code>content:''</code>字符串、html、object</p>
+                            <h5>object配置如下</h5>
+                            <blockquote>
+                               <ul class="list-group">
+                                    <li class="list-group-item active"><code>{type:'view',url:'',method:'POST',data:undefind}</code></li>
+                                    <li class="list-group-item"><span class="bdage">必填</span><code>url:''</code>请求的url</li>
+                                    <li class="list-group-item"><code>method:'POST'</code>请求的方式，默认为Post</li>
+                                    <li class="list-group-item"><code>data:undefind</code>发送的数据</li>
+                                    <li class="list-group-item active"><code>{type:'datagrid',search:true,pagination:'',columns:'',outOperator:[],table:{}}</code></li>
+                                    <li class="list-group-item"><span class="bdage">必填</span><code>type:'datagrid'</code>表示使用datagrid作为弹窗内容</li>
+                                    <li class="list-group-item"><code>search:true</code>是否显示搜索按钮</li>
+                                    <li class="list-group-item">pagination、columns、outOperator、table等配置请参照 <a target="_blank" href="/index.html">分页插件</a> 的配置</li>
+                                </ul>
+                            </blockquote>
+                        </blockquote>
+                        <h2>Demo</h2>
+                        <blockquote>
+                            <pre><code>
+                global.Fn.ShowPop({
+                    title: '弹窗示例',
+                    //size: { width: 1000 },
+                    content: {
+                        type: 'datagrid',
+                        table: { keyName: 'coupon_id' },
+                        columns: [
+                            { title: '利益代码', column: 'benefit_code' },
+                            { title: '利益名称', column: 'title',width:100 },
+                            { title: '前端名称', column: 'frontname' },
+                            { title: '利益类别', column: 'coupon_type' },
+                            { title: '使用平台', column: 'platform' },
+                            { title: '有效期类型', column: 'coupon_value' },
+                            { title: '数量限制', column: 'coupon_value' },
+                            { title: '剩余数量', column: 'coupon_value' },
+                            { title: '审核状态', column: 'coupon_value' }
+                        ],
+                        pagination: {
+                            url: '@Url.Content("~/DataServer/GetCoupone")',
+                            method: 'post',
+                            singleSelect: true
+                        }
+                    },
+                    buttons: {
+                        '保存': ["btn-primary btnSave", function ($pop) {
+                            console.log($pop.GetChecked());
+                            $pop.close(true);
+                        }]
+                    }
+                });
+                            </code></pre>
+                        </blockquote>
+                    </div>
+                    <div class="row" id="ShowMsg">
+                        <h2>global.Fn.ShowMsg(opt)</h2>
+                        <blockquote>
+                            <code>opt:{type:'show:success',title:'',msg:'',timeout:1000,callback:null,afterClose:null}</code>
+                            <h4>参数说明</h4>
+                            <p><span class="badge">必填</span>type:'show:success'  值:值==> [alert:show:confirm:prompt]:[success|error|warning] 第一个参数表示显示方式：alert、show、confirm、prompt，第二个参数表示消息的展示形式：success、error、warning</p>
+                            <ul class="list-group">
+                                <li class="list-group-item active">参数一</li>
+                                <li class="list-group-item">alert:对应表示带一个确定按钮的弹窗，需要用户点击确定才会关闭(用于显示错误消息等)</li>
+                                <li class="list-group-item">show:对应不带按钮的弹窗，而且1s后会自动关闭</li>
+                                <li class="list-group-item">confirm:对应两个按钮(确定、取消)提供用户选择操作，该方法对应一个回调函数callback 可以在改回调函数中获取用户点击的是确定按钮(true)还是取消按钮(false)</li>
+                                <li class="list-group-item">prompt:对应两个按钮和一个文本输入框，同样对应一个回调函数callback，该回调函数带2个参数，第一个表示是否点击确定按钮，第二个表示用户输入的值</li>
+                                <li class="list-group-item active">参数二</li>
+                                <li class="list-group-item">success:对应绿色，一般用于成功</li>
+                                <li class="list-group-item">warning:对应黄色，一般用于警告</li>
+                                <li class="list-group-item">error:对应红色，一般用于错误消息</li>
+                            </ul>
+                             <p><span class="badge">必填</span><code>msg</code>:提示的消息</p>
+                             <p><code>title</code>:弹窗的标题</p>
+                             <p><code>callback</code>:回调函数，仅在alert、prompt、confirm时有效</p>
+                        </blockquote>
+                        
+                        <h2>Demo</h2>
+                        <blockquote>
+                            <pre><code>
+global.Fn.ShowMsg({
+        type:'confirm:warning',
+        msg:'你确定要删除吗？',
+        title:'删除提示',
+        callback:function(result){
+            alert("你点击的结果是："+result);
+        }
+    });
+                            </code></pre>
+                        </blockquote>
+                    </div>
+                    <div class="row" id="DownLoadFile">
+                        <h2>global.Fn.DownLoadFile(opt)</h2>
+                        <blockquote>
+                            <code>opt:{url:'',data:{name:value}, method:'post'}</code>
+                            <h4>参数说明：</h4>
+                            <p><span class="badge">必填</span>url:'',字符串 请求的url地址</p>
+                            <p>data:{}，需要发送的数据，可以为任意json对象</p>
+                            <p>method:'post|get'，字符串 请求方式(get|post)</p>
+                        </blockquote>
+                        <h2>Demo</h2>
+                        <blockquote>
+                            <pre><code>
+global.Fn.DownLoadFile({
+        url:'www.baidu.com',
+        data:{sc:'test'}
+    });
+                            </code></pre>
+                            <div class="well well-sm">调用此方法会创建一个隐藏的iframe通过iframe来请求文件的下载操作不会导致页面的跳转和刷新等操作</div>
+                        </blockquote>
+                    </div>
+                    <div class="row" id="CascadeSelectDemo">
+                        <h2>global.Fn.CascadeSelect(opt)</h2>
+                        <blockquote>
+                            <code>opt:{ targets:['province','city','region'], primaryKey:'data-id', relativeKey:'data-parentId' }</code>
+                            <h4>参数说明：</h4>
+                            <p><span class="badge">必填</span> targets:[],字符串数组 关联元素的id，demo：["省","市","区"] 顺序一定需要保持一致</p>
+                            <p><span class="badge">必填</span>primaryKey:''，字符串 数据源中的键名</p>
+                            <p><span class="badge">必填</span>relativeKey:''，字符串 数据源中的关联键的键名</p>
+                        </blockquote>
+                        <h2>Demo</h2>
+                        <blockquote>
+                            <pre><code>
+global.Fn.CascadeSelect({
+        targets:['province','city','region'],//省、市、区对应的id
+        primaryKey:'data-id', --该控件中option项中对应的属性键,约定使用data-开头
+        relativeKey:'data-parentId',--该控件中option项中对应的属性键,约定使用data-开头，用于寻找上一级的关联
+    });
+                            </code></pre>
+                            <div class="well well-sm">
+                                此方法一般需要与global.Fn.ConvertToCascadeSource和表单插件配合使用，当然也可以自定义方法实现将数据源转换为对应的select控件的值
+                            </div>
+                        </blockquote>
+                    </div>
+                    <div class="row" id="InitPlugin">
+                        <h2>表单插件(datetime、img、)的初始化--global.Fn.InitPlugin = function (plugins, container)</h2>
+                        <blockquote>
+                            <p><badge>必填</badge><code>plugins:[]</code>要初始化的插件名称，有:file、img、datetime、ckeditor,你可以这样写['img','datetime']也可以任性一点这样写'img,datetime' 建议需要几个写几个(比如当前页仅需要日期插件，就只写一个datetime就行)</p>
+                             <p><code>container</code>表单id，可以为空(主要用途，缩小查找范围,提高性能)</p>
+                             <h3>Demo</h3>
+                             <code>global.Fn.InitPlugin('datetime、img')</code>
+                             <div class="well well-sm">
+                                 日期控件还支持年月日的限制选择，比如：改日期控件只允许选择到月份 没有日期，您需要在对应的控件上加一个data-minviewmodel=1
+                                 <p><code>data-minviewmodel</code>,值为1，表示显示月份 2：表示到年 0：表示可以选择到日<small>必须为数字不能是字符串</small></p>
+                                 <p><code>data-startview</<code></code>>默认会取data-minviewmodel的值，与data-minviewmodel用途一样，用于设置起始打开的界面</p>
+                                 <p><small>日期控件更多api请查看 <a href="http://bootstrap-datepicker.readthedocs.org/en/v1.4.0/" target="_blank">datetimepicker插件</a></small></p>
+                             </div>
+                        </blockquote>
+                        <h2>Demo</h2>
+                        <blockquote>
+                            元素为：<code>&lt;input type="text" class="date-picker" data-minviewmodel="1" data-format="yyyy-MM" / &gt;</code>
+                            当调用global.Fn.InitPlugin('datetime')生成插件的时候，上面这个日期插件只允许选择到月份 而且选择的值是 年-月
+                        </blockquote>
+                    </div>
+                    
+                     <div class="row" id="validation">
+                        <h2>表单验证默认设置--global.Fn.setDefaultValidator(formId)</h2>
+                        <blockquote>
+                           <p><code>formId</code>表单的id</p>
+                           <div class="well well-sm">
+                              为表单添加验证的时候需要调用此方法来增加验证相关的默认样式，验证失败时的红色警告、验证成功时候的绿色显示等。(在form表单生成后，在表单规则配置之前 否则可能无效)
+                           </div>
+                        </blockquote>
+                    </div>
+                    <div class="row" id="FormatDate">
+                        <h2>global.Fn.formatDate(utc,str,format)</h2>
+                        <blockquote>
+                            <p><code>utc</code>是否utc时间,true or false 也可以省略此参数 默认省略此参数</p>
+                            <p><span class="badge">必填</span><code>str</code>要格式化的字符串值</p>
+                            <p><code>format</code>格式,如:yyyy/MM/dd hh:mm:ss 默认为yyyy-MM-dd</p>
+                        </blockquote>
+                        <h2>Demo</h2>
+                        <blockquote>
+                            <pre><code>
+                                global.Fn.formatDate(new Date(),"yyyy-MM-dd hh:mm:ss");<br/>
+                                global.Fn.formatDate(new Date(),"yyyy-MM-dd");<br/>
+                                global.Fn.formatDate(new Date(),"yyyy-MM-dd");<br/>
+                                global.Fn.formatDate("\/Date(1439568000000)\/","yyyy-MM-dd hh:mm:ss");<br/>
+                                global.Fn.formatDate("2015/07/20","yyyy-MM-dd hh:mm:ss");<br/>...
+                            </code></pre>
+                        </blockquote>
+                    </div>
+                    <div class="row" id="jqTool">
+                        <h2>global.Fn.$(obj,container)</h2>
+                        <blockquote>
+                            <p><span class="badge">必填</span><code>obj</code>字符串|dom对象|jquery对象</p>
+                            <p><code>container</code>查找范围显示，可空</p>
+                            <div class="well well-sm">
+                                该方法返回一个jquery对象,主要用途：当不确定当前传递过来的参数是jquery对象还是id或者dom对象时使用
+                            </div>
+                        </blockquote>
+                        <h2>Demo</h2>
+                        <blockquote>
+                            <p><code>global.Fn.$($("#btnSubmit")).bind('click',function(){//......})</code>很少使用</p>
+                            <p><code>global.Fn.$('btnSubmit')</code>获取指定id的jquery对象</p>
+                            <p><code>global.Fn.$('#btnSubmit')</code>获取指定id的jquery对象</p>
+                            <p><code>global.Fn.$('.btnSubmit')</code>获取指定样式的对象</p>
+                            <p><code>global.Fn.$(document.getElementById('btnSubmit'))</code>将dom对象转换为jquery对象</p>
+                            
+                        </blockquote>
+                    </div>
+                    <div class="row" id="other">
+                        <h2>other method</h2>
+                        <blockquote>
+                            <p><code>global.Fn.FullEqual</code></p>
+                            <p><code>global.Fn.GetValuesFromJSON</code></p>
+                            <p><code>global.Fn.SaveForm</code></p>
+                            <p><code>global.Fn.BaseAjax</code></p>
+                            <p><code>global.Fn.InitFormData</code></p>
+                        </blockquote>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+
+</html>

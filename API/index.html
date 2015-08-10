@@ -1,0 +1,57 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>特百惠后台管理系统前端插件API</title>
+		<link rel="stylesheet" href="http://ajax.aspnetcdn.com/ajax/bootstrap/3.0.0/css/bootstrap.min.css">
+		<script src="http://ajax.aspnetcdn.com/ajax/jquery/jquery-1.10.2.min.js"></script>
+		<script src="http://ajax.aspnetcdn.com/ajax/bootstrap/3.0.0/bootstrap.min.js"></script>
+	</head>
+	<body>
+		<div class="navbar navbar-inverse navbar-fixed-top">
+			<div class="container">
+				<div class="navbar-header">
+					<a href="Index.html" class="navbar-brand">API</a>
+				</div>
+				<div class="navbar-collapse collapse">
+					<ul class="nav navbar-nav" id="apimenu">
+						<li data-url="../pagedDataTableAPI.html">
+							<a href="#">分页插件</a>
+						</li>
+						 <li>
+                            <a  target="_blank" href="../global.html">global辅助库</a>
+                        </li>
+						<li>
+							<a target="_blank" href="http://www.cnblogs.com/xiexingen/p/4553354.html">表单插件</a>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+		<div class="container-fruit" id="app" style="margin-top:51px">
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<h3 class="panel-title">
+						<i class="fa fa-list"></i>特百惠后台管理系统前端插件API</h3>
+				</div>
+				<div class="panel-body">
+					<h4>可以通过该页面查询开发中需要使用到的api</h4>
+				</div>
+			</div>
+		</div>
+		<script>
+			$(function(){
+				$("#apimenu").on('click','li[data-url]',function(){
+					var url=$(this).data('url');
+					$.get(url,function(html){
+						$("#app").html(html);
+					});
+				}).find("li:first").trigger('click');
+				
+				
+			});
+		</script>
+	</body>
+
+</html>

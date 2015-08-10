@@ -1,0 +1,283 @@
+<style>
+    code{white-space: normal;}
+</style>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">
+            <i class="fa fa-list"></i>分页插件配置项API
+        </h3>
+    </div>
+    <div class="panel-body">
+        <div class="panel-group" id="paging_config" role="tablist" aria-multiselectable="true">
+            <div class="panel panel-default">
+                <div class="panel-heading" role="tab" id="table_config_heading" href="#table_config" aria-expanded="true" data-toggle="collapse" data-parent="#paging_config">
+                    <h4 class="panel-title"><a role="button">table:{}</a></h4>
+                </div>
+                <div id="table_config" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="table_config_heading">
+                    <div class="panel-body">
+                        <ul class="list-group">
+                            <li class="list-group-item">
+                                <code>className: 'table table-responsive table-bordered table-hover'</code>
+                                <span>
+                                    table使用的样式
+                                    如果需要使用其他样式请配置此列
+                                </span>
+                            </li>
+                            <li class="list-group-item">
+                                <span class="badge">必填</span>
+                                <code>keyName: ''</code>
+                                <span>
+                                    主键列名(删除、编辑或其他相关操作时使用)
+                                </span>
+                            </li>
+                            <li class="list-group-item">
+                                <code>container: 'pagedDataTable'</code>
+                                <span>
+                                    主键列名(删除、编辑或其他相关操作时使用)
+                                </span>
+                            </li>
+                            <li class="list-group-item">
+                                <code>selectOnCheck:true</code>
+                                <span>点击行选中,如果有选择框  </span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading" role="tab" id="columns_config_heading" href="#column_config" aria-expanded="true" data-toggle="collapse" data-parent="#paging_config">
+                    <h4 class="panel-title">
+                        <a role="button">
+                            columns:[{}]
+                            <small>参数说明：columns的参数为json数组，单项的配置如下：</small>
+                        </a>
+                    </h4>
+                </div>
+                <div id="column_config" class="panel-collapse collapse" role="tabpanel" aria-labelledby="columns_config_heading">
+                    <div class="panel-body">
+                        <ul class="list-group">
+                            <li class="list-group-item">
+                                <span class="badge">必填</span>
+                                <code>title: ''</code>
+                                <span>表格中列的标题</span>
+                            </li>
+                            <li class="list-group-item">
+                                <span class="badge">必填</span>
+                                <code>column: ''</code>
+                                <span>对应数据源中的列</span>
+                            </li>
+                            <li class="list-group-item">
+                                <code>sortable:true</code>
+                                <span>该列是否允许排序,默认为true</span>
+                            </li>
+                            <li class="list-group-item">
+                                <code>formatter:null</code>
+                                <span>用于自定义格式化输出,方法带一个参数(当前的值)，如：格式化为"原值+..."</span>
+                                <code>
+                                    formatter:function(currentData){return currentData+"..."}
+                                </code>
+                                <p>
+                                    如果在datasource中已经存在此列数据源，也可以这样配置
+                                    <code>formatter:global.Fn.DropDownFormatter,source:'sourceName'</code>
+                                    sourceName:'':[] ,为datasource.js数据源中定义的键名或者一个符合格式的数据源数组
+                                </p>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading" role="tab" id="pagination_config_heading" href="#pagination_config" aria-expanded="true" data-toggle="collapse" data-parent="#paging_config">
+                    <h4 class="panel-title"><a role="button">pagination:{}</a></h4>
+                </div>
+                <div id="pagination_config" aria-labelledby="pagination_config_heading" class="panel-collapse collapse" role="tabpanel">
+                    <div class="panel-body">
+                        <ul class="list-group">
+                            <li class="list-group-item">
+                                <code>rownumber:true</code>[true|false]是否显示行号，默认为true
+                            </li>
+                            <li class="list-group-item">
+                                <code>singleSelect:false</code>[true|false|null] 单选框、复选框、不显示改列
+                            </li>
+                            <li class="list-group-item">
+                                <span class="badge">必填</span>
+                                <code>url:''</code>分页请求的地址
+                            </li>
+                            <li class="list-group-item">
+                                <code>autoLoad:true</code>[true|false|undefind] 第一次进入页面是否自动请求分页数据
+                            </li>
+                            <li class="list-group-item">
+                                <code>method:'get'</code>['get'|'post'] 请求的方式
+                            </li>
+                            <li class="list-group-item">
+                                <code>pageIndex:1</code>[n] 当前请求的页,从1开始
+                            </li>
+                            <li class="list-group-item">
+                                <code>pageSize:10</code>[n] 每页的条数
+                            </li>
+                            <li class="list-group-item">
+                                <code>sortColumn:['primary key']</code>[''] 字符串数组，排序的列 默认主键id,可以允许多列
+                            </li>
+                            <li class="list-group-item">
+                                <code>sortType:['desc']</code>'desc'|'asc' 字符串数组，排序的方式 默认'desc',可以允许多列 与sortColumn对应
+                            </li>
+                            <li class="list-group-item">
+                                <code>multiSort:false</code>[true|false] 是否允许多列排序
+                            </li>
+                            <li class="list-group-item">
+                                <code>queryParameter:{}</code>{}，任意键值对数据，查询分页数据时发送的额外参数
+                            </li>
+                            <li class="list-group-item">
+                                <code>successCallBack:null</code>function(data){return data;}
+                                <p>data:数据接口返回的数据，当查询数据成功返回后，对数据源的额外处理<small>一定要返回处理后的数据</small></p>
+                            </li>
+                            <li class="list-group-item">
+                                <code>completeCallBack:null</code>function(){} 渲染成功的后做的一些额外操作
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading" role="tab" id="outOperator_config_heading" href="#outOperator_config" aria-expanded="true" data-toggle="collapse" data-parent="#paging_config">
+                    <h4 class="panel-title"><a role="button">outOperator:{search:{},del:{}}</a>表格外部的操作，如查询、删除</h4>
+                </div>
+                <div id="outOperator_config" class="panel-collapse collapse" role="tabpanel" aria-labelledby="outOperator_config_heading">
+                    <div class="panel-body">
+                        <div class="list-group">
+                            <a href="#" class="list-group-item">
+                                <h3>search:{}</h3>
+                                <p>targetId: 'btnSearch', //查询按钮id</p>
+                                <p>'form':"dataGridSearch", //查询按钮关联的表单id</p>
+                                <p>resetId: 'btnReset',//重置表单按钮id</p>
+                                <p>
+                                    beforeSearch:undefined //发送查询请求之前，可以对post的数据做额外处理
+                                    <code>
+                                        beforeSearch:function(postData){...... return postData;} //postData为已有的数据，处理完后需要return数据源
+                                    </code>
+                                </p>
+                            </a>
+                        </div>
+                        <ul class="list-group">
+                            <li class="list-group-item">
+                                <h3>del:{}</h3>
+                                <p><span class="badge">必填</span><code>url: ''</code>删除的url</p>
+                                <p><code>form:"dataGridSearch"</code>查询按钮关联的表单id</p>
+                                <p><code>targetId: 'btnDelete'</code>触发删除操作的按钮id</p>
+                            </li>
+                        </ul>
+
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading" role="tab" id="operator_config_heading" href="#operator_config" aria-expanded="true" data-toggle="collapse" data-parent="#paging_config">
+                    <h4 class="panel-title">
+                        <a role="button">
+                            operator:{}
+                            <small>表单每一行的操作按钮配置项</small>
+                        </a>
+                    </h4>
+                </div>
+                <div id="operator_config" class="panel-collapse collapse" role="tabpanel" aria-labelledby="operator_config_heading">
+                    <div class="panel-body">
+                        <h5>通用部分： <code>formatter:function(rowData){return '.....'}</code>  格式化按钮,rowData：当前行的数据</h5>
+                        <ul class="list-group">
+                            <li class="list-group-item">
+                                <code>edit:{url:'',formatter:null}</code>
+                                <p>url:请求的url</p>
+                                <p>formatter: 请参照通用部分的formatter</p>
+                            </li>
+                            <li class="list-group-item">
+                                <code>view:{url:'',formatter:null}</code>
+                                <p>url:请求的url</p>
+                                <p>formatter: 请参照通用部分的formatter</p>
+                            </li>
+                            <li class="list-group-item">
+                                <code>download:{url:'',formatter:null}</code>
+                                <p>url:请求的url</p>
+                                <p>formatter: 请参照通用部分的formatter</p>
+                            </li>
+                            <li class="list-group-item">
+                                <code>任意扩展:{url:'',formatter:null}</code>
+                                <p>url: url</p>
+                                <p>formatter: 请参照通用部分的formatter</p>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading" role="tab" id="demo_heading" href="#demo" aria-expanded="true" data-toggle="collapse" data-parent="#demo">
+                    <h4 class="panel-title"><a role="button">Demo</a></h4>
+                </div>
+                <div id="demo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="demo_heading">
+                    <div class="panel-body">
+                        <pre><code>
+                var pagedDataGrid = new PagedDataTable({
+                table: { keyName: 'coupon_id', operatorLocation:'left' },
+                columns: [
+                    { title: '利益代码', column: 'benefit_code'},
+                    { title: '扩展组合列', column: 'aa',sortable:false,formatter:function(v,row){return v+'--'+row['benefit_code']}},//格式化为当前数据源中某几列的组合
+                    { title: '利益名称', column: 'title', width: 250 },
+                    { title: '前端名称', column: 'frontname'},
+                    { title: '利益类别', column: 'coupon_type' },
+                    { title: '使用平台', column: 'platform' },
+                    { title: '有效期类型', column: 'coupon_value' },
+                    { title: '数量限制', column: 'coupon_value' },
+                    { title: '剩余数量', column: 'coupon_value' },
+                    { title: '日期', column: 'dt',formatter:function(v){return global.Fn.formatDate(v,'yyyy-MM-dd hh:mm:ss')} },
+                    { title: '审核状态', column: 'coupon_value',formatter:function(v){return v==1?"审核通过":"审核没通过"} }
+                ],
+                pagination: {
+                    url: '@Url.Content("~/DataServer/GetCoupone")',
+                    method: 'post',
+                    //singleSelect: false,
+                    sortColumn: ['benefit_code'],
+                    sortType: ['desc']
+                },
+                outOperator: {
+                    download: {
+                        url: '@Url.Content("~/FileOperator/DownLoad")',
+                        targetId: 'btnDownLoad'
+                    }
+                },
+                operator: {
+                    edit: {
+                        url: '@Url.Content("~/DataServer/API")'
+                    },
+                    download: {
+                        url: '@Url.Content("~/DataServer/API")'
+                    },
+                    del: {
+                        url: '@Url.Content("~/DataServer/API")'
+                    },
+                    copy: {
+                        url: '@Url.Content("~/DataServer/API")'
+                    },
+                    view: {
+                        url: '@Url.Content("~/DataServer/API")'
+                    },
+                    cancel_order: {
+                        url: '@Url.Content("~/DataServer/API")'
+                    },
+                    self: { //自定义实现的按钮
+                        formatter: function (rowData) {
+                            return '&lt;button data-op="self" class="btn btn-teal btn-xs" data-select="false" data-id="' + rowData['coupon_id'] + '"&gt;test&lt;/button&gt;';
+                        },
+                        handle: function (data) {
+                            console.log(data);
+                        }
+                    }
+                }
+            }).Render();
+                        </code></pre>
+                    </div>
+                </div>
+            </div>
+            
+            
+            
+        </div>
+    </div>
+</div>
