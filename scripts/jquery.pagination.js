@@ -5,11 +5,12 @@
             keyName: '',
             container: 'pagedDataTable',
             selectOnCheck:true  //是否点击的时候选中
+            operatorLocation: 'left',//'left|right' 操作栏显示的位置
         },
         columns: [
             {
             title:'',column:'',
-            sortable:false,
+            sortable:true,
             formatter:function(value){},//格式化方法
             source:''|[]    //格式化数据源，如果formatter使用预定义方法，此处需要指定数组数据源或者数据源key,key会从global.datasource中取
             }
@@ -17,12 +18,13 @@
         pagination: {
             rownumber: true, //行号
             singleSelect: false,//是否单选
+            primaryKey: true,//是否显示主键ID
             operator:true,  //是否含有操作列
             url: '',    
             autoLoad:true,  //是否自动请求数据
             method: 'get',  
             pageIndex: 1,
-            pageSize: 12,
+            pageSize: 20,
             sortColumn:[],//排序的列
             sortType:['desc'],//排序的类型
             multiSort: false,//是否允许多列排序
@@ -39,7 +41,8 @@
             },
             del:{
                 url:'',
-                method:'get'
+                method:'get',
+                targetId: 'btnDelete'
             },
         },
         operator:{  //对应于行内的操作栏,可以无限极添加自定义按钮
@@ -61,18 +64,20 @@ function PagedDataTable(tableConfig) {
             className: 'table table-responsive table-bordered table-hover',
             keyName: '',
             container: 'pagedDataTable',
-            selectOnCheck: true
+            selectOnCheck: true,
+            operatorLocation: 'left',//'left|right' 操作栏显示的位置
         },
         columns: [],
         pagination: {
-            rownumber: true, //行号
-            singleSelect: false,//是否单选
+            rownumber: false, //行号
+            primaryKey: true,
+            singleSelect: null,//是否单选按钮(true:单选，false：多选，null：不显示)，默认为不显示
             url: '',
             autoLoad: true,  //是否自动请求数据
             method: 'post',
             pageIndex: 1,
-            pageSize: 10,
-            pageList:[10,20,40,50,80,100,200,500,1000],
+            pageSize: 20,
+            pageList: [10, 20, 40, 50, 80, 100, 200, 500, 1000],
             sortColumn: [],//排序的列
             sortType: ['desc'],//排序的类型
             multiSort: false,//是否允许多列排序
@@ -96,44 +101,108 @@ function PagedDataTable(tableConfig) {
         }
     };
     var buttons = {
-        //del: {
-        //    ajax: true,
-        //    primaryKey: undefined, //guid列名，如果没有 则使用配置的列名
-        //    html: '<button data-select="false" data-op="del" data-id="{id}" type="button" class="btn btn-xs btn-primary">删除</button>',
-        //    handle: function (id, grid, $target) {
-        //        var data = {};
-        //        data[grid.config.operator.del.primaryKey || grid.config.table.keyName] = id;
-        //        global.Fn.BaseAjax({
-        //            url: grid.config.operator.del.url,
-        //            method: 'get',
-        //            postData: data,
-        //            target: $target,
-        //            callback: function () {
-        //                grid.Search();
-        //            }
-        //        });
-        //    }
-        //},
-        download: {
-            ajax: true, html: '<button data-select="false" data-op="download" data-id="{id}" type="button" class="btn btn-xs btn-primary">下载</button>',
-            handle: function (id, grid, $target) {
+        del: {
+            preDefine: true,//是否预定义
+            ajax: true,
+            primaryKey: undefined, //guid列名，如果没有 则使用配置的列名
+            html: '<button title="删除"  data-op="del" data-id="{id}" type="button" class="btn btn-xs btn-red"><i class="glyphicon glyphicon-remove"></i></button>',
+            handle: function (id, grid, $target, params) {
                 var data = {};
                 data[grid.config.operator.del.primaryKey || grid.config.table.keyName] = id;
+                data = $.extend(data, params);
+                global.Fn.ShowMsg({
+                    type: 'confirm:warning', msg: '确定要删除吗?', callback: function (result) {
+                        if (result) {
+                            global.Fn.BaseAjax({
+                                url: grid.config.operator.del.url,
+                                method: 'get',
+                                dataType: 'json',
+                                postData: data,
+                                target: $target,
+                                complete: function (response) {
+                                    try {
+                                        var postData = JSON.parse(response.responseText);
+                                        if (postData['code'] == 200) {
+                                            grid.Search();
+                                        }
+                                        else {
+                                            $target.removeAttr('disabled');
+                                            global.Fn.ShowMsg({
+                                                type: 'alert:error',
+                                                msg: postData.message || postData.msg
+                                            });
+                                        }
+                                    } catch (e) {
+                                        //$('html').parent().html(response.responseText);
+                                        var newDoc = document.open("text/html", "replace");
+                                        newDoc.write(response.responseText);
+                                        newDoc.close();
+                                    }
+                                },
+                                success: function (postData) {
+                                    //if (postData['code'] == 200) {
+                                    //    grid.Search();
+                                    //}
+                                    //else {
+                                    //    $target.removeAttr('disabled');
+                                    //    global.Fn.ShowMsg({
+                                    //        type: 'alert:error',
+                                    //        msg: postData.message || postData.msg
+                                    //    });
+                                    //}
+                                }
+                            });
+                        }
+                    }
+                });
+            }
+        },
+        download: {
+            preDefine: true,//是否预定义
+            ajax: true, html: '<button title="下载"  data-op="download" data-id="{id}" type="button" class="btn btn-xs btn-teal"><i class="glyphicon glyphicon-download-alt"></i></button>',
+            handle: function (id, grid, $target) {
+                var data = {};
+                data[grid.config.operator.download.primaryKey || grid.config.table.keyName] = id;
                 global.Fn.DownLoadFile({
-                    url: grid.config.operator.del.url,
+                    url: grid.config.operator.download.url,
                     data: data
                 });
             }
         },
-        del: {
-            html: '<a data-select="false" href="{href}" class="btn btn-xs btn-primary">删除</a>'
+        //del: {
+        //    html: '<a data-select="false" href="{href}" class="btn btn-xs btn-primary">删除</a>'
+        //},
+        copy: { html: '<a title="复制"  href="{href}" class="btn btn-xs btn-teal"><i class="glyphicon glyphicon-floppy-disk"></i></a>' },
+        edit: { html: '<a title="编辑"  href="{href}" class="btn btn-xs btn-teal"><i class="glyphicon glyphicon-edit"></i></a>' },
+        view: { html: '<a title="查看"  href="{href}" class="btn btn-xs btn-teal"><i class="glyphicon glyphicon-eye-open"></i></a>' },
+        gallery: { html: '<a title="图库"  href="{href}" class="btn btn-xs btn-teal"><i class="glyphicon glyphicon-picture"></i></a>' },
+        cancel_order: {
+            preDefine: true,//是否预定义
+            ajax: true,
+            primaryKey: undefined, //guid列名，如果没有 则使用配置的列名
+            html: '<button title="取消"  data-op="cancel_order" data-id="{id}" type="button" class="btn btn-xs btn-teal"><i class="glyphicon glyphicon-share-alt"></i></button>',
+            handle: function (id, grid, $target) {
+                var data = {};
+                data[grid.config.operator.cancel_order.primaryKey || grid.config.table.keyName] = id;
+                global.Fn.ShowMsg({
+                    type: 'confirm:warning', msg: '确定要取消吗?', callback: function (result) {
+                        if (result) {
+                            global.Fn.BaseAjax({
+                                url: grid.config.operator.cancel_order.url,
+                                method: 'get',
+                                dataType: 'html',
+                                postData: data,
+                                target: $target,
+                                success: function (postData) {
+                                    grid.Search();
+                                }
+                            });
+                        }
+                    }
+                });
+            }
         },
-        copy: { html: '<a data-select="false" href="{href}" class="btn btn-xs btn-primary">复制</a>' },
-        edit: { html: '<a data-select="false" href="{href}" class="btn btn-xs btn-primary">编辑</a>' },
-        view: { html: '<a data-select="false" href="{href}" class="btn btn-xs btn-primary">查看</a>' },
-        gallery: { html: '<a data-select="false" href="{href}" class="btn btn-xs btn-primary">图库</a>' },
     };
-
     this.config = $.extend(true, {}, defaultConfig, tableConfig);
     InitConfig(this.config);
 
@@ -152,7 +221,12 @@ function PagedDataTable(tableConfig) {
         }
 
         //默认为主键倒序排序
-        config.pagination.sortColumn[0] = config.table.keyName;
+        config.pagination.sortColumn[0] = config.pagination.sortColumn[0] == undefined ? config.table.keyName : config.pagination.sortColumn[0];
+
+        //默认所有列都允许排序
+        config.columns.forEach(function (item) {
+            item.sortable = item.sortable == undefined ? true : item.sortable;
+        });
     }
 
     this.pagedData = {};
@@ -166,12 +240,16 @@ PagedDataTable.prototype = {
         if (cur.config.pagination.rownumber) {
             arrTable.push('<th class="text-center datagrid-rownumber">行号</th>');
         }
+        if (cur.config.pagination.primaryKey) {
+            arrTable.push('<th class="text-center datagrid-rownumber">ID</th>');
+        }
         if (cur.config.pagination.singleSelect === true) {
-            arrTable.push('<th class="text-center datagrid-radio"><input disabled="disabled" type="radio"/></th>');
+            arrTable.push('<th class="text-center datagrid-radio"></th>');
         }
         else if (cur.config.pagination.singleSelect === false) {
             arrTable.push('<th class="text-center datagrid-checkbox"><input data-role="datagrid-checkAll" type="checkbox"/></th>');
         }
+
         cur.config.columns.forEach(function (item) {
             var $th = $("<th />");
             $th.attr('data-field', item['column']);
@@ -198,7 +276,13 @@ PagedDataTable.prototype = {
             arrTable.push($th.prop('outerHTML'));
         });
         if (cur.config.operator) {
-            arrTable.push('<th class="text-center">操作</th>');
+            var operatorTH = '<th class="text-center" width="1%">操作</th>';
+            if (cur.config.table.operatorLocation === 'right') {
+                arrTable.push(operatorTH);
+            }
+            else {
+                arrTable.splice(1, 0, operatorTH)
+            }
         }
         arrTable.push('</tr></thead>');
         return arrTable.join('');
@@ -211,41 +295,47 @@ PagedDataTable.prototype = {
             //foreach page data
             arrData.forEach(function (itemData, index) {
                 var guid = itemData[primaryKey];
-                arrTable.push('<tr>');
+                var arrTr = [];
+                arrTr.push('<tr>');
                 if (cur.config.pagination.rownumber) {
-                    arrTable.push('<td class="text-center datagrid-rownumber">' + ((index + 1) + (cur.config.pagination.pageIndex - 1) * cur.config.pagination.pageSize) + '</td>');
+                    arrTr.push('<td class="text-center datagrid-rownumber">' + ((index + 1) + (cur.config.pagination.pageIndex - 1) * cur.config.pagination.pageSize) + '</td>');
+                }
+                if (cur.config.pagination.primaryKey) {
+                    arrTr.push('<td class="text-center datagrid-rownumber">' + guid + '</td>');
                 }
                 if (cur.config.pagination.singleSelect === true) {
-                    arrTable.push('<td class="text-center"><input data-role="datagrid-radio" value="' + itemData[cur.config['table']['keyName']] + '" name="datagrid-radio" type="radio"/></td>');
+                    arrTr.push('<td class="text-center"><input data-role="datagrid-radio" value="' + itemData[cur.config['table']['keyName']] + '" name="datagrid-radio" type="radio"/></td>');
                 }
                 else if (cur.config.pagination.singleSelect === false) {
-                    arrTable.push('<td class="text-center"><input data-role="datagrid-check" value="' + itemData[cur.config['table']['keyName']] + '" type="checkbox"/></td>');
+                    arrTr.push('<td class="text-center"><input data-role="datagrid-check" value="' + itemData[cur.config['table']['keyName']] + '" type="checkbox"/></td>');
                 }
                 else {
                     //other 
                 }
                 cur.config.columns.forEach(function (item) {
                     var $td = $('<td />');
+                    $td.attr('name', item.column);
                     $td.addClass(item['className'] || 'text-left');
                     var tdText = (item['formatter'] && item['formatter'](itemData[item['column']], item['source'] || itemData)) || itemData[item['column']];
                     if (item['width']) {
                         var $innerDiv = $("<div>" + tdText + "</div>");
-                        $innerDiv.attr('title',tdText);
+                        $innerDiv.attr('title', tdText);
                         $td.append($innerDiv.prop('outerHTML'));
                     }
                     else {
                         $td.html(tdText);
                     }
-                    arrTable.push($td.prop('outerHTML'));
+                    arrTr.push($td.prop('outerHTML'));
                 });
                 if (cur.config.operator) {
-                    arrTable.push('<td class="text-center datagrid-op">');
+                    var operatorArr = [];
+                    operatorArr.push('<td class="text-center datagrid-op">');
 
                     for (var key in cur.config.operator) {
                         var opConfig = cur.config.operator[key];
                         if (opConfig) {
                             if (opConfig.formatter) {
-                                arrTable.push(opConfig.formatter(itemData));
+                                operatorArr.push(opConfig.formatter(itemData));
                             }
                             else {
                                 var btnHTML = '';
@@ -257,13 +347,21 @@ PagedDataTable.prototype = {
                                     var url = opConfig['url'] + concatStr + (cur.config.operator[key]['primaryKey'] || primaryKey) + "=" + guid;
                                     btnHTML = opConfig['html'].replace(/\{href\}/, url);
                                 }
-                                arrTable.push(btnHTML);
+                                operatorArr.push(btnHTML);
                             }
                         }
                     }
-                    arrTable.push('</td>');
+                    operatorArr.push('</td>');
+
+                    if (cur.config.table.operatorLocation === 'right') {
+                        arrTr.push(operatorArr.join(''));
+                    }
+                    else {
+                        arrTr.splice(1, 0, operatorArr.join(''))
+                    }
                 }
-                arrTable.push('</tr>');
+                arrTr.push('</tr>');
+                arrTable.push(arrTr.join(''));
             });
         }
         else {
@@ -275,10 +373,10 @@ PagedDataTable.prototype = {
     _GeneratePageList: function (pageList) {
         var cur = this;
         var pageListHTML = [];
-        pageListHTML.push('<div class="col-sm-1" style="padding:0;" >');
+        pageListHTML.push('<div class="col-sm-2" style="padding:0;" >');
         pageListHTML.push('<select data-handle="page-list" class="form-control" >');
         pageList.forEach(function (value, index, arr) {
-            pageListHTML.push('<option value="' + value+'" ');
+            pageListHTML.push('<option value="' + value + '" ');
             if (value == cur.config.pagination.pageSize) {
                 pageListHTML.push(' selected="selected" ');
             }
@@ -303,7 +401,7 @@ PagedDataTable.prototype = {
 
         pagingHTML.push(cur._GeneratePageList(cur.config.pagination.pageList));
 
-        pagingHTML.push('<div class="col-sm-11">');
+        pagingHTML.push('<div class="col-sm-8">');
         pagingHTML.push(' <ul id="pagination" class="pagination pagination-margin">');
         var curPageIndex = cur.config.pagination.pageIndex
         if (total_page > 0) {
@@ -315,27 +413,19 @@ PagedDataTable.prototype = {
                 pagingHTML.push("<li data-page='1'><a>&lt;|</a></li>");
                 pagingHTML.push("<li data-page='" + (curPageIndex - 1) + "'><a>&lt;</a></li>");
             }
-            //var endpage = (curPageIndex + 5) > total_page ? total_page : (curPageIndex + 5);
-            //var startPage = (curPageIndex - 5) > 0 ? (curPageIndex - 5) : 1;
-            //for (var i = startPage; i <= endpage ; i++) {
+
+            //for (var i = 1; i <= total_page; i++) {
             //    if (curPageIndex == i) {
             //        pagingHTML.push("<li class='active'><span>" + i + "</span></li>");
-            //    } else {
+            //    }
+            //    else if (Math.abs(i - curPageIndex) <= 2) {
             //        pagingHTML.push("<li data-page='" + i + "'><a><span>" + i + "</span></a></li>");
             //    }
             //}
-
-            for (var i = 1; i <= total_page; i++) {
-                if (curPageIndex == i) {
-                    pagingHTML.push("<li class='active'><span>" + i + "</span></li>");
-                }
-                else if (Math.abs(i - curPageIndex) <= 2) {
-                    pagingHTML.push("<li data-page='" + i + "'><a><span>" + i + "</span></a></li>");
-                }
-            }
+            pagingHTML.push('<li><input class="pull-left pagination-number form-control input-sm" value="' + curPageIndex + '" type="number" min="1" max="' + total_page + '" ><li>');
 
             if (total_page > curPageIndex) {
-                pagingHTML.push("<li data-page='" + (curPageIndex + 1) + "'><a>&gt;</a></li>");
+                pagingHTML.push("<li data-page='" + (Number(curPageIndex) + 1) + "'><a>&gt;</a></li>");
                 pagingHTML.push("<li data-page='" + total_page + "'><a>&gt;|</a></li>");
             }
             else {
@@ -381,6 +471,7 @@ PagedDataTable.prototype = {
                 }
                 else {
                     cur.pagedData = data;
+                    cur.pagedData.info.result_list = cur.pagedData.info.result_list || [];
                 }
                 deffer.resolve();
             }
@@ -440,6 +531,27 @@ PagedDataTable.prototype = {
         var cur = this;
         return cur.pagedData.info.result_list || [];
     },
+    /*==============在数据源中查找指定主键值的数据
+     * 
+     */
+    GetDataByKeyValue: function (primaryKeyValue) {
+        var cur = this;
+        var primaryKeyName = cur.config.table.keyName;
+        var sources = cur.pagedData.info.result_list || [];
+        var finedRow;
+        var finded = sources.some(function (v) {
+            if (v[primaryKeyName] == primaryKeyValue) {
+                finedRow = v;
+                return true;
+            }
+        });
+        if (finded) {
+            return finedRow;
+        }
+        else {
+            throw "数据源中没有找到指定主键值的数据";
+        }
+    },
     Render: function () {
         var cur = this;
         //table 的config
@@ -461,17 +573,27 @@ PagedDataTable.prototype = {
         $container.append($pageContainer).append($pageBarContainer);
 
         var outConfig = cur.config.outOperator;
+        var $searchForm = global.Fn.$(outConfig.search.form);
         if (outConfig.search) {
             //查询
-            global.Fn.$(outConfig.search.targetId).bind('click', function () {
+            global.Fn.$(outConfig.search.targetId, $searchForm).bind('click.search_form', function () {
                 cur.Search();
             });
             //重置
-            global.Fn.$(outConfig.search.resetId).bind('click', function () {
-                global.Fn.$(outConfig.search.form)[0].reset();
+            global.Fn.$(outConfig.search.resetId, $searchForm).bind('click.reset_form', function () {
+                $searchForm[0].reset();
+                cur.Search();
+            });
+
+            //Enter键 触发搜索
+            $searchForm.on('keydown.search_form', 'input', function (e) {
+                if (e.keyCode == $.ui.keyCode.ENTER) {
+                    global.Fn.$(outConfig.search.targetId, $searchForm).trigger('click.search_form');
+                    return false;
+                }
             });
         }
-        //删除
+        //表格外部删除
         if (outConfig.del) {
             var $del = global.Fn.$(outConfig.del.targetId);
             $del.bind('click', function () {
@@ -508,7 +630,7 @@ PagedDataTable.prototype = {
             });
         }
 
-        //下载
+        //表格外部下载
         if (outConfig.download) {
             var $download = global.Fn.$(outConfig.download.targetId);
             $download.bind('click', function () {
@@ -537,38 +659,84 @@ PagedDataTable.prototype = {
         //点击行选中
         if (tabConfig.selectOnCheck) {
             $container.on('click.datagrid', "tbody>tr", function (e) {
-                var $clickTarget = $('input[data-role^="datagrid-"]', $(this));
-                //执行ajax操作的指定function
-                var $target = $(e.target);
-                //忽略掉系统选择框和操作按钮
-                if ($target.data('role') !== $clickTarget.data('role') && $target.data('select') !== false) {
-                    $clickTarget.trigger('click');
-                    e.preventDefault();
+                //var $clickTarget = $('input[data-role^="datagrid-"]', $(this));
+                ////执行ajax操作的指定function
+                //var $target = $(e.target);
+                //if ($target.hasClass('glyphicon')) {
+                //    $target = $target.closest('.btn');
+                //}
+                ////忽略掉系统选择框和操作按钮
+                //if ($target.data('role') !== $clickTarget.data('role') && $target.data('select') !== false) {
+                //    $clickTarget.trigger('click');
+                //    e.preventDefault();
+                //}
+                //复选或者单选框
+                var $selectTarget = $('input[data-role^="datagrid-"]', $(this));
+                //当前行tr
+                var $trTarget = $(this);
+                //实际点击的对象
+                var $realyTarget = $(e.target);
+                if ($realyTarget.parents('td.datagrid-op', $container).length != 1 && $realyTarget[0] != $selectTarget[0]) {
+                    //过滤超链接
+                    if (!$realyTarget.attr('href')) {
+                        $selectTarget.prop('checked', !$selectTarget.prop('checked'));
+                        e.preventDefault();
+                        return false;
+                    }
                 }
+                //datagrid-op
             });
         }
 
-        //操作按钮如：copy、del
+        //表格内部操作按钮如：copy、del、cancel...
         $container.on('click.opbutton', '.btn[data-op]', function () {
             var $target = $(this);
             var opType = $target.data('op');
+
             if (opType) {
-                cur.config.operator[opType]['handle']($target.data('id'), cur, $target);
+                var buttonDefine = cur.config.operator[opType];
+                var curRowId = $target.data('id');
+                if (buttonDefine['preDefine']) {
+                    buttonDefine['handle'](curRowId, cur, $target);
+                }
+                else {
+                    var rowData = cur.GetDataByKeyValue(curRowId);
+                    buttonDefine['handle']({ cur: cur, target: $target, rowData: rowData });
+                }
             }
         })
 
         //分页事件
-        $pageBarContainer.on('click', 'li', function (event) {
-            var pageIndex = $(this).data('page');
-            if (pageIndex) {
-                cur.config.pagination.pageIndex = parseInt(pageIndex);
+        $pageBarContainer
+            .on('click', 'li[data-page]', function (event) {
+                var pageIndex = $(this).data('page');
+                if (pageIndex) {
+                    cur.config.pagination.pageIndex = parseInt(pageIndex);
+                    cur.Search();
+                }
+            })
+            .on('change.selectPage', 'select[data-handle="page-list"]', function (event) {
+                var pageSize = $(this).val();
+                cur.config.pagination.pageSize = pageSize;
                 cur.Search();
-            }
-        }).on('change', 'select[data-handle="page-list"]', function (event) {
-            var pageSize = $(this).val();
-            cur.config.pagination.pageSize = pageSize;
-            cur.Search();
-        });
+            })
+            .on('change.changePage', '.pagination-number', function (event) {
+                var $target = $(this);
+                var v = $target.val();
+                if (/^\d+$/.test(v) && v > 0) {
+                    cur.config.pagination.pageIndex = v;
+                    cur.Search();
+                }
+                else {
+                    $target.val(cur.config.pagination.pageIndex);
+                }
+            }).on('keydown.enter_pagination-number', '.pagination-number', function (event) {
+                if ($.ui.keyCode.ENTER == event.keyCode) {
+                    $(this).trigger('blur');
+                    event.preventDefault();
+                    return false;
+                }
+            });
 
         //全选功能
         $($(':checkbox[data-role="datagrid-checkAll"]'), $container).bind('click', function () {
@@ -628,10 +796,16 @@ PagedDataTable.prototype = {
             cur.Search();
         });
 
+
         return cur;
     },
     Search: function () {
         var cur = this;
+        global.Fn.$(cur.config.table.container).block({
+            //message: '<img src="/images/images/loading.gif" />',
+            message: '<span>加载中...</span>',
+            css: { border: '1px solid gray', width: 'auto', height: 'auto', backgroundColor: 'transparent', border: 'none' }
+        });
         var searchConfig = cur.config.outOperator.search;
         var postData = global.Fn.serializeJson(global.Fn.$(searchConfig.form));
         //处理post的数据
@@ -652,6 +826,8 @@ PagedDataTable.prototype = {
                 var pageBar = cur.GeneratePageBar(pagedData.total);
                 $('#' + cur.config.table.container + " table>tbody").html(tbodyHtml);
                 $("#pager-bar-container", $container).html(pageBar);
+                //分页后取消复选框的选中
+                $('#' + cur.config.table.container + ' :checkbox[data-role="datagrid-checkAll"]').removeAttr("checked");
             }
             else {
                 var tbodyHtml = cur._GenerateTableBody([]);
@@ -661,6 +837,8 @@ PagedDataTable.prototype = {
             if (cur.config.pagination.completeCallBack) {
                 cur.config.pagination.completeCallBack();
             }
-        }).fail(function (data) { console.error('数据接口出错！') });
+            global.Fn.$(cur.config.table.container).unblock();
+
+        }).fail(function (data) { global.Fn.$(cur.config.table.container).unblock(); console.error('数据接口出错！'); });
     },
 };

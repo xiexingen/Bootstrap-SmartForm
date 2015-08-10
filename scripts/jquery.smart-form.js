@@ -18,7 +18,6 @@ options:{
         img:{name:'',multiple:'true',extendAttr:{handle:'single',url:'',filed:''}} //上传的键名、多选文件、是否单个显示、上传url、保存的时name名
         //withNull:仅在select时有效果
         //items：仅在select、radio、checkbox时有效
-        //items:[{text:'',value:'',extendAttr:{id:'',parentId:''}}] //用于级联的处理
         //selectContainClass:仅在radio、checkbox、datetime时有效，用于radio、checkbox外层的样式(默认：radio|checkbox-inline、input-group)   
         //render：优先级比其他属性高，相当于生成改元素的源码
         //pre,next:{ele:{iconClass: 'glyphicon glyphicon-calendar', text: '',type:'',render:''}}用于配置前后的input-group-addon
@@ -49,7 +48,7 @@ function BSForm(eleConfigs) {
     //一些默认配置
     var defaultConfig = {
         select: '<select>',
-        nullSelectOption: '<option>--请选择--</option>',
+        nullSelectOption: '<option value="" >--请选择--</option>',
         text: '<input type="text" />',
         file: '<input type="file"/>',
         img: '<input type="file"/>',
@@ -66,12 +65,12 @@ function BSForm(eleConfigs) {
     var exports = {
         containerID: '', //存放当前容器ID
     };
-    
+
     exports.config = $.extend(true, { autoLayout: false, hides: false }, eleConfigs);
     /*=================将model绑定到form表单中
      * model:要绑定的model json
      */
-    exports.InitFormData=function (model) {
+    exports.InitFormData = function (model) {
         var cur = exports;
         if (!model) { return cur; }
 
@@ -85,11 +84,11 @@ function BSForm(eleConfigs) {
                 elesConfig[key].forEach(function (config, index, arr) {
                     if ($.type(config) == 'array') {
                         config.forEach(function (sConfig) {
-                            _SetDefaultValue(sConfig, model, $form);
+                            SetDefaultValue(sConfig, model);
                         })
                     }
                     else {
-                        _SetDefaultValue(config, model, $form);
+                        SetDefaultValue(config, model);
                     }
                 });
             }
@@ -99,11 +98,11 @@ function BSForm(eleConfigs) {
             elesConfig.forEach(function (config, index, arr) {
                 if ($.type(config) == 'array') {
                     config.forEach(function (sConfig) {
-                        _SetDefaultValue(sConfig, model, $form);
+                        SetDefaultValue(sConfig, model);
                     })
                 }
                 else {
-                    _SetDefaultValue(config, model, $form);
+                    SetDefaultValue(config, model);
                 }
             });
         }
@@ -119,6 +118,44 @@ function BSForm(eleConfigs) {
             });
         }
         return cur;
+
+        function SetDefaultValue(eleConfig, model) {
+            var ele = eleConfig['ele'];
+            if (eleConfig && ele && ele['name']) {
+                var key = ele['name'];
+                var eleValue = model[key];
+                if (key !== undefined && eleValue !== undefined) {
+                    if (ele['type'] === 'text' || ele['type'] === 'select' || ele['type'] === 'datetime' || ele['type'] === 'search' || ele['type'] === 'textarea') {
+                        $("#" + key, global.Fn.$(cur.containerID)).val(eleValue || '');
+                    }
+                    else if (ele['type'] === 'radio') {
+                        $(":radio[name=" + key + "][value='" + eleValue + "']", $form).attr('checked', 'checked')
+                    }
+                    else if (ele['type'] === 'checkbox' && eleValue.length > 0) {
+                        var $ckboxs = $(':checkbox[name="' + key + '"]', $form);
+                        $ckboxs.each(function (index, item) {
+                            if (eleValue.some(function (ev) { return ev == item.value })) {
+                                $(item).attr('checked', 'checked');
+                            }
+                            else {
+                                $(item).removeAttr('checked');
+                            }
+                        });
+                    }
+                }
+                else if (ele['type'] === 'img') {
+                    var imgKey = ele['extendAttr']['field'];
+                    eleValue = model[imgKey];
+                    if ($.type(eleValue) == 'string') {
+                        eleValue = [eleValue];
+                    }
+                    var $ul = $(":file[data-field='" + ele['extendAttr']['field'] + "']", $form).closest('div').next('div.upload-list').find('ul');
+                    eleValue.forEach(function (value, index) {
+                        $ul.append('<li><img src="' + value + '"><span class="upload-item-remove glyphicon glyphicon-remove"></span><input name="' + ele['extendAttr']['field'] + '" type="hidden" value="' + value + '" /></li>');
+                    });
+                }
+            }
+        }
     };
     
     /*=================呈现页面
@@ -450,7 +487,7 @@ function BSForm(eleConfigs) {
             //设置value的值
             _SetElementAttribute($selector, 'rows', eleConfig.rows, true);
             _SetElementAttribute($selector, 'cols', eleConfig.cols, true);
-            $selector.text(eleConfig.value);
+            $selector.text(eleConfig.value || '');
             $target.append($selector);
         }
         else if (feType === "radio") {
@@ -589,44 +626,6 @@ function BSForm(eleConfigs) {
         });
         $contain.append($formContent.html());
     };
-
-    function _SetDefaultValue(eleConfig, model,container) {
-        var ele = eleConfig['ele'];
-        if (eleConfig && ele && ele['name']) {
-            var key = ele['name'];
-            var eleValue = model[key];
-            if (key !== undefined && eleValue !== undefined) {
-                if (ele['type'] === 'text' || ele['type'] === 'select' || ele['type'] === 'datetime' || ele['type'] === 'search' || ele['type'] === 'textarea') {
-                    $("#" + key, global.Fn.$(exports.containerID)).val(eleValue);
-                }
-                else if (ele['type'] === 'radio') {
-                    $(":radio[name=" + key + "][value='" + eleValue + "']", container).attr('checked', 'checked')
-                }
-                else if (ele['type'] === 'checkbox' && eleValue.length > 0) {
-                    var $ckboxs = $(':checkbox[name="' + key + '"]', container);
-                    $ckboxs.each(function (index, item) {
-                        if (eleValue.some(function (ev) { return ev == item.value })) {
-                            $(item).attr('checked', 'checked');
-                        }
-                        else {
-                            $(item).removeAttr('checked');
-                        }
-                    });
-                }
-            }
-            else if (ele['type'] === 'img') {
-                var imgKey = ele['extendAttr']['field'];
-                eleValue = model[imgKey];
-                if ($.type(eleValue) == 'string') {
-                    eleValue = [eleValue];
-                }
-                var $ul = $(":file[data-field='" + ele['extendAttr']['field'] + "']", container).closest('div').next('div.upload-list').find('ul');
-                eleValue.forEach(function (value, index) {
-                    $ul.append('<li><img src="' + value + '"><span class="upload-item-remove glyphicon glyphicon-remove"></span><input name="' + ele['extendAttr']['field'] + '" type="hidden" value="' + value + '" /></li>');
-                });
-            }
-        }
-    }
 
     // #endregion
 };

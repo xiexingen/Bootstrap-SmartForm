@@ -10,7 +10,7 @@
 + Serialize Form to Json
 * form: [id,#id,$(#id)], 
 * filter: filter string suport RegExp,array,object
-* Add By Gary *
+
 =============================*/
 global.Fn.serializeJson = function (form, filter) {
     var _filtDisabled = true;
@@ -51,16 +51,17 @@ global.Fn.serializeJson = function (form, filter) {
 + Get Jquery Object
 * str: string / dom element / jquer object
 * return jquery object
-* Add By Gary *
+
 =============================*/
-global.Fn.$ = function (str) {
+global.Fn.$ = function (str, container) {
     if (!str) return false;
+    container = global.Fn.$(container) || $(document);
     if (str.jquery) {
         return str;
     } else if (typeof str == "string" && !/[#\.\*\:\s\+~>\[]/.test(str)) {
-        return $("#" + str);
+        return $("#" + str, container);
     } else {
-        return $(str);
+        return $(str, container);
     }
 }
 
@@ -170,7 +171,7 @@ global.Fn.GetValuesFromJSON = function (arrJSON, key) {
 
 /***=========================
 + Set Default Form Validate
-* Add By Gary *
+
 =============================*/
 global.Fn.setDefaultValidator = function (form) {
     //Form Validate
@@ -241,6 +242,7 @@ global.Fn.setDefaultValidator = function (form) {
         submitHandler: function (form) {
             successHandler1.show();
             errorHandler1.hide();
+            return true;
         }
     });
 };
@@ -248,13 +250,12 @@ global.Fn.setDefaultValidator = function (form) {
 
 /***=========================
 + Show Messege
-* Add By Gary *
 =============================*/
 global.Fn.ShowMsg = function (options) {
     var templates = {
         dialog:
           "<div class='show-msg modal fade' tabindex='-1' role='dialog'>" +
-            "<div class='modal-dialog'>" +
+            "<div class='modal-dialog modal-sm' style='top:50%;left:50%;margin-left:-150px;margin-top:-54px;position:absolute;' >" +
               "<div class='show-msg-content modal-content'>" +
                     "<div class='show-msg-head modal-header'>" +
                         '' +//图片
@@ -279,7 +280,7 @@ global.Fn.ShowMsg = function (options) {
         //width: '300px',         //Tips popups width (only for 'show')
         //height: '120px',        //Tips popups height (only for 'show')
         //showType: 'fade',       //Tips popups show type (only for 'show')
-        timeout: 3000,          //Tips popups show type (only for 'show')
+        timeout: 1000,          //Tips popups show type (only for 'show')
         callback: null,         //callback (only for 'confirm')
         afterClose: null,       //callback (after click close button)
     };
@@ -304,7 +305,7 @@ global.Fn.ShowMsg = function (options) {
     if (_showDialog) {
         $('.modal-backdrop').hide();
         $('.modal-body', $dialog).addClass('text-center');
-        setTimeout(function () { $dialog.remove(); $('.modal-backdrop:first').remove(); }, opts.timeout);
+        setTimeout(function () { $dialog.modal('hide').remove(); $('.modal-backdrop:first').remove(); }, opts.timeout);
     }
     else if (_alertDialog) {
         $footer.append($btnOk);
@@ -317,6 +318,7 @@ global.Fn.ShowMsg = function (options) {
     }
     else if (_promptDialog) {
         $footer.append($btnOk);
+        $footer.append($btnCancel);
         $('.show-msg-content', $dialog).append($footer);
     }
     else {
@@ -355,6 +357,8 @@ global.Fn.ShowMsg = function (options) {
     if (!_promptDialog) {
         $tipsTitle.prepend('<i class="fa fa-info-circle"/>');
     } else {
+        var $input = '<div class="row"><div class="col-sm-12"><input id="confirmValue" class="form-control" type="text"></div><div>';
+        $(".modal-body", $dialog).after($input);
         $btnCancel.attr("class", "btn btn-sm btn-default");
     }
     if (style[1]) {
@@ -376,7 +380,12 @@ global.Fn.ShowMsg = function (options) {
     $btnOk.bind('click.msg', function () {
         closeDialog();
         if (opts.callback) {
-            opts.callback(true);
+            if (_promptDialog) {
+                opts.callback(true, $("#confirmValue", $dialog).val());
+            }
+            else {
+                opts.callback(true);
+            }
         }
     });
 
@@ -388,7 +397,7 @@ global.Fn.ShowMsg = function (options) {
     })
 
     function closeDialog() {
-        $('.show-msg').remove();
+        $('.show-msg').modal('hide').remove();
         $('.modal-backdrop:first').remove();
         if (opts.afterClose) {
             opts.afterClose();
@@ -398,7 +407,7 @@ global.Fn.ShowMsg = function (options) {
 
 /***=========================
 + Show Popups
-* Add By Gary *
+
 =============================*/
 global.Fn.ShowPop = function (options) {
     var _randomNum = parseInt(100000 * Math.random());
@@ -543,8 +552,8 @@ global.Fn.ShowPop = function (options) {
                     _content += '<form id="popSearchForm">\n' +
                         '<div class="row form-group quick-search">\n' +
                             '<div class="input-group col-sm-6">\n' +
-                                '<div class=" input-icon"><input type="text" name="sc" value="' + _searchKey + '" class="form-control input-sm" placeholder="please enter searchkey"><i class="clip-search"></i></div>\n' +
-                                '<div class=" input-group-btn"><span type="button" id="btnSearch" class="btn btn-warning btn-sm btnSearch">Search</span><span type="button" id="btnReset" class="btn btn-default btn-sm">Reset</span></div>\n' +
+                                '<div class=" input-icon"><input type="text" name="sc" value="' + _searchKey + '" class="form-control input-sm" placeholder="请输入要搜索的值"><i class="clip-search"></i></div>\n' +
+                                '<div class=" input-group-btn"><span type="button" id="btnSearch" class="btn btn-warning btn-sm btnSearch">查询</span><span type="button" id="btnReset" class="btn btn-default btn-sm">重置</span></div>\n' +
                             '</div>' +
                             '</div>\n' +
                     '</form>\n';
@@ -555,32 +564,39 @@ global.Fn.ShowPop = function (options) {
                 $("div.modal-footer button:contains(Save)", $popups).text("Select");
                 $popups.list = $("#" + _listid);
 
+                var paginationConfig = $.extend(true, {
+                    completeCallBack: function () { $popups.setPosition(1); }//在datagrid渲染完成后 重新定位位置
+                }, opts.content.pagination);
+
+                var outOperator = $.extend(true, {
+                    search: {
+                        targetId: 'btnSearch', //查询按钮id
+                        form: "popSearchForm", //查询按钮关联的表单id
+                        beforeSearch: undefined,
+                        resetId: 'btnReset'
+                    },
+                    del: false
+                }, opts.content.outOperator);
                 var popDatagrid = new PagedDataTable({
                     table: {
                         keyName: opts.content.table.keyName,
                         container: _listid
                     },
                     columns: opts.content.columns,
-                    pagination: {
-                        rownumber: opts.content.pagination.rownumber, //行号
-                        singleSelect: opts.content.pagination.singleSelect,//是否单选
-                        url: opts.content.pagination.url,
-                        autoLoad: opts.content.pagination.autoLoad,  //是否自动请求数据
-                        method: opts.content.pagination.method,
-                        pageIndex: opts.content.pagination.pageIndex,
-                        pageSize: opts.content.pagination.pageSize,
-                        queryParameter: opts.content.pagination.queryParameter, //查询的表单
-                        successCallBack: opts.content.pagination.successCallBack,// function (data) { return data;} //查询数据成功后的回调，用于对数据的处理
-                        completeCallBack: function () { $popups.setPosition(1); } //在datagrid渲染完成后 重新定位位置
-                    },
-                    outOperator: {
-                        search: {
-                            targetId: 'btnSearch', //查询按钮id
-                            form: "popSearchForm", //查询按钮关联的表单id
-                            beforeSearch: undefined,
-                            resetId: 'btnReset'
-                        },
-                    }
+                    //pagination: {
+                    //    rownumber: opts.content.pagination.rownumber, //行号
+                    //    singleSelect: opts.content.pagination.singleSelect,//是否单选
+                    //    url: opts.content.pagination.url,
+                    //    autoLoad: opts.content.pagination.autoLoad,  //是否自动请求数据
+                    //    method: opts.content.pagination.method,
+                    //    pageIndex: opts.content.pagination.pageIndex,
+                    //    pageSize: opts.content.pagination.pageSize,
+                    //    queryParameter: opts.content.pagination.queryParameter, //查询的表单
+                    //    successCallBack: opts.content.pagination.successCallBack,// function (data) { return data;} //查询数据成功后的回调，用于对数据的处理
+                    //    completeCallBack: function () { $popups.setPosition(1); } //在datagrid渲染完成后 重新定位位置
+                    //},
+                    pagination: paginationConfig,
+                    outOperator: outOperator
                 }).Render();
                 //增加获取所选数据方法
                 $popups.GetChecked = $.proxy(popDatagrid.GetChecked, popDatagrid);
@@ -652,47 +668,36 @@ global.Fn.ShowPop = function (options) {
 
 /***===============
 + Remove loading layer
-* Add By Gary *
+
 =============================*/
 global.Fn.removeLoading = function (obj) {
     var $obj = obj || $(".LoadFileLayer");
-    $obj.fadeOut(50, function () {
+    $obj.fadeOut(200, function () {
         $obj.remove();
     });
     //global.LoadFileState = false;
 }
-
-global.Fn.showLoading = function (container) {
-    var $container = global.Fn.$(container||document.body);
-    $(document.body).append('<div class="LoadFileLayer"><div><img src="/images/images/ajax-loader-small.gif" />正在拼了命的为你加载...</div></div>');
-    $(".LoadFileLayer").css({
-        left: $container.offset().left,
-        top: $container.offset().top
-    });
-}
-
 
 /*=====================提交表单
  * options:{
  * target:'',
  * method:'',
  * form:'',
+ * isAjax:true,
  * validateReadOnly:true, //是否验证readonly的元素
  * beforePost:function(){},
  * callback:function(){}
  * }
  */
 global.Fn.SaveForm = function (options) {
-    var defaultConfig = { method: 'post', validateReadOnly: true };
+    var defaultConfig = { method: 'post', validateReadOnly: true, isAjax: true };
     var config = $.extend(true, defaultConfig, options);
-    global.Fn.$(config.target).attr('disabled', true);
     ValidateConfig(config);
     //验证表单
     if (global.Fn.$(config.form).valid()) {
         if (config.validateReadOnly) {
             var $readonlyInputs = global.Fn.$(config.form).find('input[readonly]');
             if ($readonlyInputs.length > 0 && !$readonlyInputs.valid()) {
-                global.Fn.$(config.target).removeAttr('disabled');
                 global.Fn.ShowMsg({
                     type: 'alert:error',
                     msg: '表单验证不通过，请修改！'
@@ -700,14 +705,18 @@ global.Fn.SaveForm = function (options) {
                 return false;
             }
         }
-        config.postData = global.Fn.serializeJson(config.form);
-        if (config.beforePost) {
-            config.postData = config.beforePost(config.postData);
+        if (config.isAjax) {
+            config.postData = global.Fn.serializeJson(config.form);
+            if (config.beforePost) {
+                config.postData = config.beforePost(config.postData);
+            }
+            global.Fn.BaseAjax(config);
         }
-        global.Fn.BaseAjax(config);
+        else {
+            global.Fn.$(config.form)[0].submit();
+        }
     }
     else {
-        global.Fn.$(config.target).removeAttr('disabled');
         global.Fn.ShowMsg({
             type: 'alert:error',
             msg: '表单验证不通过，请修改！'
@@ -715,9 +724,61 @@ global.Fn.SaveForm = function (options) {
     }
     //验证参数
     function ValidateConfig(config) {
-        if (!config.form || !config.url || !config.target) {
+        if (!config.form || !config.target) {
             throw new Error('表单参数缺省');
         }
+    }
+}
+
+/*===============表单提交前的处理
+ * options:{
+ * target:'btnSubmit', //id、样式选择器、jquery对象
+ * form:'editForm', //id、样式选择器、jquery对象
+ * isAjax:false,
+ * listenerChange:false //是否监听该表单改变
+ * }
+ */
+global.Fn.InitForm = function (options) {
+    var config = $.extend(true, {
+        target: 'btnSave',
+        form: 'editForm',
+        isAjax: false,
+    }, options);
+
+    global.Fn.setDefaultValidator(config.form);
+
+    var $btnSave = global.Fn.$(config.target);
+    $btnSave.bind('click', function (e) {
+        global.Fn.SaveForm({
+            target: config.target,
+            form: config.form,
+            isAjax: config.isAjax
+        });
+        e.preventDefault();
+    });
+
+    if (config.listenerChange) {
+        global.preFormData = global.Fn.serializeJson(config.form);
+        $(document).on('click.changePage', 'a[href]', function (e) {
+            var $target = $(this);
+            (e || window.event).preventDefault();
+            global.curFormData = global.Fn.serializeJson(config.form);
+            global.formChange = global.formChange || global.Fn.Equal(global.preFormData, global.curFormData);
+            if (global.formChange === true) {
+                global.Fn.ShowMsg({
+                    type: 'confirm:warning',
+                    msg: '检查您有未保存的数据，是否保存？',
+                    callback: function (yesNo) {
+                        if (yesNo) {
+                            $btnSave.trigger('click');
+                        }
+                        else {
+                            location.href = $target.attr('href');
+                        }
+                    }
+                });
+            }
+        });
     }
 }
 
@@ -753,13 +814,8 @@ global.Fn.DownLoadFile = function (options) {
  * }
  */
 global.Fn.BaseAjax = function (options) {
-    var config = $.extend(true, { successShowMsg: true, method: 'post', dataType: 'json' }, options);
-    if (config.target) { global.Fn.$(config.target).attr('disabled', true); }
-    $.ajax({
-        url: config.url,
-        type: config.method,
-        data: config.postData,
-        dataType: config.dataType,
+    var config = $.extend(true, {
+        successShowMsg: true, method: 'post', dataType: 'json',
         success: function (data) {
             if (config.dataType == 'json') {
                 if (data['code'] == 200) {
@@ -782,11 +838,22 @@ global.Fn.BaseAjax = function (options) {
                 if (config.target) { global.Fn.$(config.target).removeAttr('disabled') };
             }
             else if (config.dataType == 'html') {
-                window.document = data;
+                $('html') = data;
             }
             else {
                 console.log("ajax未实现的响应类型:" + data);
             }
+        }
+    }, options);
+    if (config.target) { global.Fn.$(config.target).attr('disabled', true); }
+    $.ajax({
+        url: config.url,
+        type: config.method,
+        data: config.postData,
+        dataType: config.dataType,
+        success: config.success,
+        complete: function (data) {
+            config.complete && config.complete(data);
         },
         error: function (data) {
             if (config.target) { global.Fn.$(config.target).removeAttr('disabled') };
@@ -867,12 +934,31 @@ global.Fn.InitPlugin = function (plugins, container) {
     }
     if (plugins.indexOf('img') !== -1) {
         var $imgs = $('.upload-file', global.Fn.$(container || document));
-        $.each($imgs, function (index,img) {
+        $.each($imgs, function (index, img) {
             global.Fn.InitUploadImage($(img).parent());
         });
     }
     if (plugins.indexOf('datetime') !== -1) {
-        $("input.date-picker").datetimepicker({ pickTime: false, format: 'YYYY-MM-DD' }).next("span.input-group-btn").bind("click", function () { $(this).prev(".date-picker").focus(); });
+        var $datePickers = $("input.date-picker");
+        if ($datePickers && $datePickers.length > 0) {
+            $.each($datePickers, function (index, item) {
+                var $cur = global.Fn.$(item);
+                var minViewModel = parseInt($cur.data('minviewmodel') || 0);
+                var startView = parseInt($cur.data('startview') || minViewModel || 0);
+                $cur.datepicker({
+                    language: 'zh-CN',
+                    format: $cur.data('format') || 'yyyy-mm-dd',
+                    autoclose: true,
+                    clearBtn: true,
+                    todayHighlight: true,
+                    orientation: 'auto top',
+                    //todayBtn: 'linked',//true,
+                    //defaultViewDate:1,//0,year: the current year、month: 1 、day: 1
+                    minViewMode: minViewModel,// “days” or 0, “months” or 1, and “years” or 2
+                    startView: startView,//0 day,1 month ,2 year
+                }).next("span.input-group-btn").bind("click", function () { $(this).prev(".date-picker").focus(); });
+            });
+        }
     }
     if (plugins.indexOf('ckeditor') !== -1) {
         var ckeditors = $('textarea[data-handle="ckeditor"]', container);
@@ -899,9 +985,30 @@ global.Fn.InitUploadImage = function (container) {
             $file[0].click();
         }
         else if ($target.hasClass('upload-item-remove')) {
+            //如果当前所属form之上有disabled的fieldset则不允许移除
+            var $targetFieldSet = $target.closest('fieldset');
+            if ($targetFieldSet && $targetFieldSet.prop('disabled') == true) {
+                return;
+            }
             $target.closest('li').remove();
         }
     });
+
+    if ($upload.data('tip')) {
+        $upload.on('mouseenter', "ul>li>img[src]", function (e) {
+            //间隔距离
+            var x = 10, y = 20;
+            var url = $(this).attr('src');
+            var tipImg = "<div class='tipImg'><img src='" + url + "'/></div>";
+            $("body").append(tipImg);
+            $(".tipImg").css({ "top": (e.pageY + y) + "px", "left": (e.pageX + x) + "px" }).fadeIn();
+        }).on('mouseleave', "ul>li>img[src]", function (e) {
+            $(".tipImg").remove();
+        }).on('mousemove', "ul>li>img[src]", function (e) {
+            var x = 10, y = 20;
+            $(".tipImg").css({ "top": (e.pageY + y) + "px", "left": (e.pageX + x) + "px" });
+        });
+    }
 
     var $fileUpload = $(':file', $upload);
     $fileUpload.fileupload({
@@ -919,7 +1026,8 @@ global.Fn.InitUploadImage = function (container) {
             data = JSON.parse(data.result);
             if (data.result == "200") {
                 //var $targetScope= $(this).closest(".upload-file");
-                $(".upload-list>ul", $upload).append('<li><img src="' + data.imgurl + '"><span class="upload-item-remove glyphicon glyphicon-remove"></span><input name="' + $(':file', $upload).data('field') + '" type="hidden" value="' + data.imgurl + '" /></li>');
+
+                $(".upload-list>ul", $upload).append('<li><img width="100" height="100" src="' + http_server + data.imgurl + '"><span class="upload-item-remove glyphicon glyphicon-remove"></span><input name="' + $(':file', $upload).data('field') + '" type="hidden" value="' + data.imgurl + '" /></li>');
             } else {
                 global.Fn.ShowMsg({
                     type: 'alert:error',
@@ -928,6 +1036,117 @@ global.Fn.InitUploadImage = function (container) {
             }
         },
     });
+}
+
+global.Fn.isJson = function (obj) {
+    return typeof (obj) == "object" && Object.prototype.toString.call(obj).toLowerCase() == "[object object]" && !obj.length;
+}
+global.Fn.isArray = function (obj) {
+    return Object.prototype.toString.apply(obj) == '[object Array]';
+}
+global.Fn.isJsonOrArray = function (obj) {
+    return typeof (obj) == "object" && Object.prototype.toString.call(obj).toLowerCase() == "[object object]" && !obj.length || toString.apply(obj) == '[object Array]';
+}
+
+/*============用于判断两个对象是否相等
+ * 
+ */
+global.Fn.Equal = function (obj1, obj2) {
+    var type1 = $.type(obj1);
+    var type2 = $.type(obj2);
+    if (type1 === type2) {
+        if (type1 == 'object' || type1 == 'array') {
+            return JSON.stringify(obj1) === JSON.stringify(obj2);
+        }
+        else if (type1 === 'undefined' || type1 === 'null') {
+            return true;
+        }
+        else {
+            return type1 === type2;
+        }
+    }
+    else {
+        return false;
+    }
+}
+
+/***=========================
++ Format Date
+* global.Fn.formatDate([utc,] str [,format])
+* utc:[true|false] 
+* str: Date string
+* format: Support all formats what you want (yyyy MM dd hh:mm:ss)
+=============================*/
+global.Fn.formatDate = function () {
+    var dFormat = "yyyy-MM-dd",//default date format
+        utc = true,
+		str = arguments[0],
+        format = arguments[1] || dFormat;
+
+    if (typeof str === "boolean") {
+        utc = str;
+        str = arguments[1];
+        format = arguments[2] || dFormat;
+    }
+    if (!str) return;
+    //if (!format) format = "dd/MM/yyyy hh:mm:ss";
+    var curDate = new Date();
+    //base on server's time zone, -480:Beijing,-240:dubai.
+    var timeoffset = -480;//curDate.getTimezoneOffset();
+    var myDate
+    if (str instanceof Date) {
+        myDate = str;
+    } else if (typeof str == "number") {
+        myDate = new Date(str);
+    } else if ($.type(str) == "object") {
+        var _format = str.format; //str format
+        str = str.date;
+    } else if (typeof str == "string") {
+        if (/Date/.test(str) || !isNaN(str)) {
+            str = str.replace(/(^\/Date\()|(\)\/$)/g, "");
+            str = parseInt(str);
+            //UTC to Local time
+            if (utc) str = str - (timeoffset * 60000);
+            myDate = new Date(str);
+        } else if (/\:/.test(str)) {
+            var _reg1 = /(\d{1,2})([\s\/])(\d{1,2})\2(\d{2,4})/;
+            var _reg2 = /(\d{2,4})([\s\/\-])(\d{1,2})\2(\d{1,2})/;
+            var _format = str.split(":")[1]; //str format
+            str = str.split(":")[0];
+            if (_format == "dmy") {
+                str = str.replace(_reg1, "$3$2$1$2$4");
+            } else if (_format == "ydm") {
+                str = str.replace(_reg2, "$1$2$4$2$3");
+            }
+            myDate = new Date(str);
+            if (!utc) {
+                str = myDate.getTime() + (timeoffset * 60000);
+                myDate = new Date(str);
+            }
+        } else {
+            return str;
+        }
+    } else {
+        return;
+    }
+    var opts = {
+        "M+": myDate.getMonth() + 1,                    //Month 
+        "d+": myDate.getDate(),                         //Day   
+        "h+": myDate.getHours(),                        //Hours   
+        "m+": myDate.getMinutes(),                      //Minute   
+        "s+": myDate.getSeconds(),                      //Second   
+        "q+": Math.floor((myDate.getMonth() + 3) / 3),  //Quarter   
+        "S": myDate.getMilliseconds()                   //Millisecond   
+    };
+    if (/(y+)/.test(format)) {
+        format = format.replace(RegExp.$1, (myDate.getFullYear() + "").substr(4 - RegExp.$1.length));
+    }
+    for (var k in opts) {
+        if (new RegExp("(" + k + ")").test(format)) {
+            format = format.replace(RegExp.$1, (RegExp.$1.length == 1) ? (opts[k]) : (("00" + opts[k]).substr(("" + opts[k]).length)));
+        }
+    }
+    return format;
 }
 
 /*===============级联下拉
@@ -950,7 +1169,7 @@ global.Fn.CascadeSelect = function (opt) {
 
             $next.find('option[' + opt.relativeKey + '="' + curKeyValue + '"]').removeClass('hide');
             $next.find('option[' + opt.relativeKey + '!="' + curKeyValue + '"]').addClass('hide');
-            $next.find('option:not([value])').removeClass('hide');
+            $next.find('option[value=""]').removeClass('hide');
 
             //如果下一项的option处于显示状态，则自动选中，否则显示请选择
             if ($next.find('option[value="' + nextVal + '"]').hasClass('hide')) {
@@ -988,5 +1207,28 @@ global.Fn.DropDownFormatter = function (value, source) {
         }
     })
     return returnData;
+}
+
+/*
+options:{
+    items:[{}],
+    primaryKey:'id',
+    relativeKey:'parentId',
+    text:'text',
+    value:'value'
+}
+*/
+global.Fn.ConvertToCascadeSource = function (options) {
+    var opts = $.extend(true, { primaryKey: 'id', relativeKey: 'parentId', text: 'text', value: 'value' }, options);
+    var items = opts.items || [];
+    var results = [];
+    items.forEach(function (item, index) {
+        var extendAttr = {};
+        extendAttr[opts.primaryKey] = (item[opts.primaryKey] || '').trim();
+        extendAttr[opts.relativeKey] = (item[opts.relativeKey] || '').trim();
+        var rItem = { text: item[opts.text], value: item[opts.value], extendAttr: extendAttr };
+        results.push(rItem);
+    });
+    return results;
 }
 
